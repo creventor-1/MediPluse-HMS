@@ -1,0 +1,258 @@
+
+/* ==========================================================================
+   SECTION THEMES — paste at the very BOTTOM of style.css (after the
+   earlier enhancements block). Edit the colours here to re-theme anything.
+   The sidebar adds a class like "theme-patients" to <body> on each page.
+   ========================================================================== */
+
+/* ---------- Default / brand: emerald (landing, login, dashboard) ---------- */
+
+body,
+body.theme-dashboard {
+  --primary: #059669;
+  --primary-dark: #047857;
+  --primary-light: #ecfdf5;
+  --accent: #14b8a6;
+  --bg: #f0faf6;
+  --rgb: 5, 150, 105;
+  --side1: #062a1f;
+  --side2: #0a3b2c;
+  --ring: 0 0 0 3px rgba(5, 150, 105, 0.25);
+  --emoji: "🏥";
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M22 15v14M15 22h14' stroke='%23059669' stroke-opacity='.14' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 44px 44px;
+}
+
+/* ---------- Patients: teal, dots ---------- */
+body.theme-patients {
+  --primary: #0d9488; --primary-dark: #0f766e; --primary-light: #f0fdfa; --accent: #2dd4bf;
+  --bg: #effbfa; --rgb: 13, 148, 136; --side1: #052b2a; --side2: #073b3a;
+  --ring: 0 0 0 3px rgba(13, 148, 136, 0.25);
+  --emoji: "🧑‍⚕️";
+  --pattern: radial-gradient(rgba(13, 148, 136, 0.2) 1.5px, transparent 1.7px) 0 0 / 22px 22px;
+}
+
+/* ---------- Appointments: violet, calendar grid ---------- */
+body.theme-appointments {
+  --primary: #7c3aed; --primary-dark: #6d28d9; --primary-light: #f5f3ff; --accent: #c084fc;
+  --bg: #f6f3ff; --rgb: 124, 58, 237; --side1: #1e1038; --side2: #2a1650;
+  --ring: 0 0 0 3px rgba(124, 58, 237, 0.25);
+  --emoji: "📅";
+  --pattern: linear-gradient(rgba(124, 58, 237, 0.09) 1px, transparent 1px) 0 0 / 30px 30px,
+             linear-gradient(90deg, rgba(124, 58, 237, 0.09) 1px, transparent 1px) 0 0 / 30px 30px;
+}
+
+/* ---------- Doctors: rose, diagonal stripes ---------- */
+body.theme-doctors {
+  --primary: #e11d48; --primary-dark: #be123c; --primary-light: #fff1f2; --accent: #fb7185;
+  --bg: #fff5f6; --rgb: 225, 29, 72; --side1: #3a0d18; --side2: #4a1020;
+  --ring: 0 0 0 3px rgba(225, 29, 72, 0.25);
+  --emoji: "🩺";
+  --pattern: repeating-linear-gradient(135deg, rgba(225, 29, 72, 0.07) 0 2px, transparent 2px 16px);
+}
+
+/* ---------- Lab results: burnt orange, bubbles ---------- */
+body.theme-lab {
+  --primary: #c2410c; --primary-dark: #9a3412; --primary-light: #fff7ed; --accent: #fb923c;
+  --bg: #fff8f1; --rgb: 194, 65, 12; --side1: #3a1807; --side2: #4a2008;
+  --ring: 0 0 0 3px rgba(194, 65, 12, 0.25);
+  --emoji: "🧪";
+  --pattern: radial-gradient(circle at 25% 25%, rgba(194, 65, 12, 0.15) 2px, transparent 2.6px) 0 0 / 30px 30px,
+             radial-gradient(circle at 75% 75%, rgba(194, 65, 12, 0.1) 3px, transparent 3.6px) 0 0 / 30px 30px;
+}
+
+/* ---------- Billing: gold, ledger lines ---------- */
+body.theme-billing {
+  --primary: #b45309; --primary-dark: #92400e; --primary-light: #fffbeb; --accent: #f59e0b;
+  --bg: #fffbf0; --rgb: 180, 83, 9; --side1: #33220a; --side2: #44300c;
+  --ring: 0 0 0 3px rgba(180, 83, 9, 0.25);
+  --emoji: "💳";
+  --pattern: repeating-linear-gradient(0deg, rgba(180, 83, 9, 0.08) 0 1px, transparent 1px 28px);
+}
+
+/* ---------- Staff: fuchsia, rings ---------- */
+body.theme-staff {
+  --primary: #a21caf; --primary-dark: #86198f; --primary-light: #fdf4ff; --accent: #e879f9;
+  --bg: #fdf5ff; --rgb: 162, 28, 175; --side1: #2b0a30; --side2: #3a0f40;
+  --ring: 0 0 0 3px rgba(162, 28, 175, 0.25);
+  --emoji: "👥";
+  --pattern: radial-gradient(circle, transparent 0 9px, rgba(162, 28, 175, 0.12) 9px 10px, transparent 10px) 0 0 / 34px 34px;
+}
+
+/* ---------- Reports: charcoal, fine columns ---------- */
+body.theme-reports {
+  --primary: #3f3f46; --primary-dark: #27272a; --primary-light: #f4f4f5; --accent: #a1a1aa;
+  --bg: #f5f5f6; --rgb: 63, 63, 70; --side1: #18181b; --side2: #27272a;
+  --ring: 0 0 0 3px rgba(63, 63, 70, 0.25);
+  --emoji: "📊";
+  --pattern: repeating-linear-gradient(90deg, rgba(63, 63, 70, 0.06) 0 1px, transparent 1px 22px);
+}
+
+/* ---------- Shared: everything below reads the theme variables ---------- */
+
+body {
+  background:
+    radial-gradient(900px 420px at 100% -10%, rgba(var(--rgb), 0.14), transparent 60%),
+    radial-gradient(700px 380px at -10% 110%, rgba(var(--rgb), 0.1), transparent 60%),
+    var(--pattern),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+.sidebar {
+  background:
+    radial-gradient(260px 220px at 0% 0%, rgba(var(--rgb), 0.5), transparent 70%),
+    linear-gradient(180deg, var(--side1), var(--side2));
+}
+
+.sidebar nav a.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 10px 22px -10px rgba(var(--rgb), 0.9);
+}
+
+.sidebar .brand-mark,
+.brand-box .brand-mark,
+.landing-brand .mark,
+.user-chip .avatar {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+}
+
+/* Page header becomes a coloured banner with a faint section icon */
+.page-header,
+.topbar {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 30px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 18px 36px -16px rgba(var(--rgb), 0.7);
+  color: #fff;
+}
+
+.page-header::after,
+.topbar::after {
+  content: var(--emoji);
+  position: absolute;
+  right: 200px;
+  bottom: -18px;
+  font-size: 96px;
+  line-height: 1;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.page-header > *,
+.topbar > * { position: relative; z-index: 1; }
+
+.page-header h2,
+.topbar h2 { color: #fff; }
+
+.page-header .eyebrow,
+.topbar .eyebrow { color: rgba(255, 255, 255, 0.78); }
+
+.page-header .button-link.secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+.page-header .button-link.secondary:hover { background: rgba(255, 255, 255, 0.32); }
+
+.pill {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+/* Form controls, panels, tables follow the theme colour */
+.auth-form input:focus,
+.form-grid input:focus,
+.form-grid textarea:focus,
+.form-grid select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+  background: #fff;
+}
+
+.panel thead th { background: var(--primary-light); color: var(--primary-dark); }
+.panel tbody tr:hover { background: var(--primary-light); }
+.stat-card .stat-icon { background: var(--primary-light); color: var(--primary); }
+.stat-card::after { background: var(--primary-light); }
+
+.form-card h3::before,
+.panel-header h3::before { background: linear-gradient(180deg, var(--primary), var(--accent)); }
+
+button,
+.button-link { background: var(--primary); }
+button:hover,
+.button-link:hover { background: var(--primary-dark); }
+.button-link.secondary { background: #eef1f6; color: var(--ink); }
+.button-link.secondary:hover { background: #e2e7f0; }
+
+/* ---------- Login & landing: emerald brand ---------- */
+
+.auth-body {
+  background:
+    radial-gradient(520px 380px at 12% 18%, rgba(5, 150, 105, 0.24), transparent 70%),
+    radial-gradient(520px 380px at 88% 82%, rgba(20, 184, 166, 0.22), transparent 70%),
+    var(--pattern),
+    linear-gradient(160deg, #ecfdf5, #f7fffb 60%, #e8faf3);
+}
+
+.auth-card::before { background: linear-gradient(90deg, var(--primary), var(--accent)); }
+
+.auth-form button[type="submit"] {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 10px 20px -8px rgba(var(--rgb), 0.6);
+}
+.auth-form button[type="submit"]:hover {
+  background: linear-gradient(135deg, var(--primary-dark), #065f46);
+}
+
+.badge { background: var(--primary-light); color: var(--primary-dark); }
+
+.hero {
+  background:
+    radial-gradient(600px 360px at 90% 10%, rgba(var(--rgb), 0.18), transparent 70%),
+    radial-gradient(520px 320px at 0% 100%, rgba(20, 184, 166, 0.16), transparent 70%),
+    var(--pattern),
+    linear-gradient(180deg, #effcf6, #ffffff);
+}
+
+.section.alt {
+  background:
+    radial-gradient(rgba(5, 150, 105, 0.12) 1.4px, transparent 1.6px) 0 0 / 24px 24px,
+    linear-gradient(180deg, #f0faf6, #e6f7ef);
+}
+
+.feature-card:hover,
+.role-card:hover { border-color: rgba(var(--rgb), 0.35); }
+
+.cta-band {
+  background:
+    radial-gradient(400px 220px at 90% 0%, rgba(255, 255, 255, 0.2), transparent 70%),
+    linear-gradient(135deg, #047857, #0d9488);
+}
+.cta-band .button-link { background: #fff; color: #047857; }
+.cta-band .button-link:hover { background: #ecfdf5; }
+
+/* Landing feature icons borrow each module's own colour */
+.feature-card:nth-child(1) .ico { background: #f0fdfa; }
+.feature-card:nth-child(2) .ico { background: #f5f3ff; }
+.feature-card:nth-child(3) .ico { background: #fff7ed; }
+.feature-card:nth-child(4) .ico { background: #fffbeb; }
+.feature-card:nth-child(5) .ico { background: #fdf4ff; }
+.feature-card:nth-child(6) .ico { background: #f4f4f5; }
+
+.float-card.c1 .ico { background: #f0fdfa; }
+.float-card.c2 .ico { background: #f5f3ff; }
+.float-card.c3 .ico { background: #fff7ed; }
+
+@media (max-width: 900px) {
+  .page-header::after,
+  .topbar::after { right: 16px; font-size: 72px; }
+}
+
+@media print {
+  .page-header, .topbar { background: none; color: #000; box-shadow: none; padding: 0 0 12px; }
+  .page-header h2, .topbar h2, .page-header .eyebrow { color: #000; }
+  .page-header::after, .topbar::after { display: none; }
+  body { background: #fff; }
+}
