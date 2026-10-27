@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireRole(['admin', 'receptionist', 'doctor']);
+requireSectionPermission('appointments', 'update');
 
 $pdo = getDb();
 $roleKey = currentRoleKey();
@@ -13,20 +13,25 @@ if ($id === '') {
     redirect('/appointments/index.php');
 }
 
-$stmt = $pdo->prepare(
-    'SELECT a.*, p.fullName AS patientName FROM tblAppointments a
-     JOIN tblPatients p ON p.patientID = a.patientID WHERE a.appointmentID = ?'
-);
-$stmt->execute([$id]);
+$appointmentSql = 'SELECT a.*, p.fullName AS patientName FROM tblAppointments a
+                   JOIN tblPatients p ON p.patientID = a.patientID WHERE a.appointmentID = ?';
+$appointmentParameters = [$id];
+if ($isDoctor) {
+    $appointmentSql .= ' AND a.doctorID = ?';
+    $appointmentParameters[] = currentDoctorId($pdo) ?? '';
+}
+$stmt = $pdo->prepare($appointmentSql);
+$stmt->execute($appointmentParameters);
 $appointment = $stmt->fetch();
 
-// A doctor may only open their own appointments (and only change the status).
+// A doctor may only update appointments assigned to their profile.
 if (!$appointment || ($isDoctor && $appointment['doctorID'] !== currentDoctorId($pdo))) {
     redirect('/appointments/index.php');
 }
 
 $statuses = ['Booked', 'Completed', 'Cancelled'];
 $doctorsList = $pdo->query('SELECT doctorID, fullName, specialty FROM tblDoctors ORDER BY fullName')->fetchAll();
+$myDoctorId = $isDoctor ? currentDoctorId($pdo) : null;
 $message = '';
 $messageType = '';
 
@@ -34,35 +39,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_appointment'])
     verify_csrf();
 
     $status = trim($_POST['status'] ?? '');
+    $attendedByDoctorId = trim($_POST['attended_by_doctor_id'] ?? '');
+    $attendedByDoctorId = $attendedByDoctorId === '' ? null : $attendedByDoctorId;
 
     if (!in_array($status, $statuses, true)) {
         $message = 'Choose a valid status.';
         $messageType = 'danger';
     } elseif ($isDoctor) {
-        $pdo->prepare('UPDATE tblAppointments SET status = ? WHERE appointmentID = ?')->execute([$status, $id]);
-        redirect('/appointments/index.php');
+        if ($status === 'Completed' && $attendedByDoctorId === null) {
+            $message = 'Select the doctor who attended the patient before completing the appointment.';
+            $messageType = 'danger';
+        } elseif ($attendedByDoctorId !== null && !in_array($attendedByDoctorId, array_column($doctorsList, 'doctorID'), true)) {
+            $message = 'Choose a valid doctor who attended the patient.';
+            $messageType = 'danger';
+        } else {
+            $pdo->prepare(
+                'UPDATE tblAppointments SET status = ?, attendedByDoctorID = ? WHERE appointmentID = ? AND doctorID = ?'
+            )->execute([$status, $attendedByDoctorId, $id, $myDoctorId ?? '']);
+            redirect('/appointments/index.php');
+        }
     } else {
         $doctorId = trim($_POST['doctor_id'] ?? '');
         $date = trim($_POST['date'] ?? '');
         $time = trim($_POST['time'] ?? '');
 
-        $stmt = $pdo->prepare(
-            "SELECT COUNT(*) FROM tblAppointments
-             WHERE doctorID = ? AND appointmentDate = ? AND appointmentTime = ? AND status = 'Booked' AND appointmentID <> ?"
-        );
-        $stmt->execute([$doctorId, $date, $time, $id]);
-
-        if ($doctorId === '' || $date === '' || $time === '') {
-            $message = 'Doctor, date and time are required.';
+        if ($status === 'Completed' && $attendedByDoctorId === null) {
+            $message = 'Select the doctor who attended the patient before completing the appointment.';
             $messageType = 'danger';
-        } elseif ($status === 'Booked' && (int) $stmt->fetchColumn() > 0) {
-            $message = 'That doctor already has an appointment at the selected date and time.';
+        } elseif ($attendedByDoctorId !== null && !in_array($attendedByDoctorId, array_column($doctorsList, 'doctorID'), true)) {
+            $message = 'Choose a valid doctor who attended the patient.';
             $messageType = 'danger';
         } else {
-            $pdo->prepare(
-                'UPDATE tblAppointments SET doctorID = ?, appointmentDate = ?, appointmentTime = ?, status = ? WHERE appointmentID = ?'
-            )->execute([$doctorId, $date, $time, $status, $id]);
-            redirect('/appointments/index.php');
+            $stmt = $pdo->prepare(
+                "SELECT COUNT(*) FROM tblAppointments
+                 WHERE doctorID = ? AND appointmentDate = ? AND appointmentTime = ? AND status = 'Booked' AND appointmentID <> ?"
+            );
+            $stmt->execute([$doctorId, $date, $time, $id]);
+
+            if ($doctorId === '' || $date === '' || $time === '') {
+                $message = 'Doctor, date and time are required.';
+                $messageType = 'danger';
+            } elseif ($status === 'Booked' && (int) $stmt->fetchColumn() > 0) {
+                $message = 'That doctor already has an appointment at the selected date and time.';
+                $messageType = 'danger';
+            } else {
+                $pdo->prepare(
+                    'UPDATE tblAppointments SET doctorID = ?, appointmentDate = ?, appointmentTime = ?, status = ?, attendedByDoctorID = ? WHERE appointmentID = ?'
+                )->execute([$doctorId, $date, $time, $status, $attendedByDoctorId, $id]);
+                redirect('/appointments/index.php');
+            }
         }
 
         $appointment['doctorID'] = $doctorId;
@@ -95,7 +120,7 @@ require __DIR__ . '/../partials/head.php';
 
       <section class="form-card">
         <h3><?php echo e($appointment['appointmentID']); ?> - <?php echo e($appointment['patientName']); ?></h3>
-        <p class="hint"><?php echo $isDoctor ? 'Update the status of this appointment.' : 'Reschedule or update this appointment.'; ?></p>
+        <p class="hint"><?php echo $isDoctor ? 'Update the status and record which doctor attended the patient.' : 'Reschedule or update this appointment and record the attending doctor.'; ?></p>
         <form method="POST" class="form-grid">
           <?php echo csrf_field(); ?>
           <input type="hidden" name="id" value="<?php echo e($appointment['appointmentID']); ?>">
@@ -122,6 +147,18 @@ require __DIR__ . '/../partials/head.php';
             <select name="status">
               <?php foreach ($statuses as $s): ?>
                 <option value="<?php echo e($s); ?>" <?php echo $appointment['status'] === $s ? 'selected' : ''; ?>><?php echo e($s); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <label>
+            Doctor who attended the patient
+            <select name="attended_by_doctor_id">
+              <option value="">Not recorded</option>
+              <?php foreach ($doctorsList as $d): ?>
+                <?php $selectedAttendingDoctor = $appointment['attendedByDoctorID'] ?? ($isDoctor ? $myDoctorId : null); ?>
+                <option value="<?php echo e($d['doctorID']); ?>" <?php echo $selectedAttendingDoctor === $d['doctorID'] ? 'selected' : ''; ?>>
+                  <?php echo e($d['fullName'] . ($d['specialty'] ? ' - ' . $d['specialty'] : '')); ?>
+                </option>
               <?php endforeach; ?>
             </select>
           </label>

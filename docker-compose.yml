@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=medipulse_hms
+      - DB_USER=medipulse
+      - DB_PASS=medipulse_pass
+      - AUTO_MIGRATE=true
+      - ADMIN_USERNAME=admin
+      - ADMIN_EMAIL=admin@medipulse.local
+      - ADMIN_PASSWORD=adminpassword123
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - "./MediPluse HMS:/var/www/html"
+
+  db:
+    image: mariadb:10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=medipulse_hms
+      - MYSQL_USER=medipulse
+      - MYSQL_PASSWORD=medipulse_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:

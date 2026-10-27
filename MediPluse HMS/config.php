@@ -1,44 +1,86 @@
 <?php
 
+function loadLocalEnvironment(): void
+{
+    $envFile = __DIR__ . '/.env';
+    if (!is_readable($envFile)) {
+        return;
+    }
+
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) {
+            continue;
+        }
+
+        [$name, $value] = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!preg_match('/^[A-Z][A-Z0-9_]*$/', $name) || getenv($name) !== false) {
+            continue;
+        }
+
+        if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"')
+            || ($value[0] === "'" && substr($value, -1) === "'"))) {
+            $value = substr($value, 1, -1);
+        }
+
+        putenv($name . '=' . $value);
+        $_ENV[$name] = $value;
+    }
+}
+
+loadLocalEnvironment();
+
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'samesite' => 'Lax',
+]);
 session_start();
 
-/*
-|--------------------------------------------------------------------------
-| APPLICATION CONFIGURATION
-|--------------------------------------------------------------------------
-*/
 
 define('APP_NAME', 'MediPulse HMS');
 
 
-/*
-|--------------------------------------------------------------------------
-| DATABASE CONFIGURATION
-|--------------------------------------------------------------------------
-|
-| Update these to match your local MySQL / XAMPP setup.
-|
-*/
 
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'medipulse_hms');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+$dbHost = getenv('DB_HOST') ?: '127.0.0.1';
+$dbPort = getenv('DB_PORT') ?: '3306';
+$dbName = getenv('DB_NAME') ?: 'medipulse_hms';
+$dbUser = getenv('DB_USER') ?: 'root';
+$dbPass = getenv('DB_PASS') ?: '';
+
+$databaseUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+if (!empty($databaseUrl)) {
+    $parsedUrl = parse_url($databaseUrl);
+    if ($parsedUrl) {
+        $dbHost = $parsedUrl['host'] ?? $dbHost;
+        $dbPort = (string) ($parsedUrl['port'] ?? $dbPort);
+        $dbUser = isset($parsedUrl['user']) ? urldecode($parsedUrl['user']) : $dbUser;
+        $dbPass = isset($parsedUrl['pass']) ? urldecode($parsedUrl['pass']) : $dbPass;
+        if (!empty($parsedUrl['path'])) {
+            $dbName = ltrim($parsedUrl['path'], '/');
+        }
+    }
+}
+
+define('DB_HOST', $dbHost);
+define('DB_PORT', $dbPort);
+define('DB_NAME', $dbName);
+define('DB_USER', $dbUser);
+define('DB_PASS', $dbPass);
+define('APP_URL', rtrim(getenv('APP_URL') ?: '', '/'));
+define('MAIL_HOST', getenv('MAIL_HOST') ?: '');
+define('MAIL_PORT', (int) (getenv('MAIL_PORT') ?: 587));
+define('MAIL_USERNAME', getenv('MAIL_USERNAME') ?: '');
+define('MAIL_PASSWORD', getenv('MAIL_PASSWORD') ?: '');
+define('MAIL_FROM_ADDRESS', getenv('MAIL_FROM_ADDRESS') ?: '');
+define('MAIL_FROM_NAME', getenv('MAIL_FROM_NAME') ?: APP_NAME);
+define('PASSWORD_RESET_TTL_MINUTES', max(5, (int) (getenv('PASSWORD_RESET_TTL_MINUTES') ?: 30)));
 
 
-/*
-|--------------------------------------------------------------------------
-| APPLICATION BASE URL (auto-detected)
-|--------------------------------------------------------------------------
-|
-| This used to be hard-coded (e.g. "/MediPluse%20HMS"), which broke the
-| moment the project folder was renamed or moved. Instead we work out
-| where this file lives on disk relative to the web server's document
-| root, and derive the URL prefix from that automatically. Rename the
-| folder, move it into a subfolder, or deploy it anywhere — this still
-| resolves correctly, with each path segment safely URL-encoded.
-|
-*/
 
 function resolveAppBaseUrl(): string
 {
@@ -49,7 +91,6 @@ function resolveAppBaseUrl(): string
     $projectRoot = rtrim(str_replace('\\', '/', __DIR__), '/');
 
     if ($documentRoot === '' || strpos($projectRoot, $documentRoot) !== 0) {
-        // Fallback: derive from the currently requested script instead.
         $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
         return rtrim($scriptDir, '/');
     }
@@ -69,11 +110,6 @@ function resolveAppBaseUrl(): string
 define('APP_BASE_URL', resolveAppBaseUrl());
 
 
-/*
-|--------------------------------------------------------------------------
-| URL / REDIRECT HELPERS
-|--------------------------------------------------------------------------
-*/
 
 function url(string $path = ''): string
 {
@@ -87,27 +123,12 @@ function redirect(string $path): void
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| OUTPUT HELPER (short alias for htmlspecialchars)
-|--------------------------------------------------------------------------
-*/
 
 function e($value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| CSRF PROTECTION
-|--------------------------------------------------------------------------
-|
-| Every form in the app includes csrf_field(). Every POST handler calls
-| verify_csrf() before touching the database.
-|
-*/
 
 function csrf_token(): string
 {
@@ -161,7 +182,7 @@ function currentUser(): array
 |
 */
 
-const APP_ROLES = ['admin', 'doctor', 'receptionist', 'lab_technician', 'billing_officer', 'patient'];
+const APP_ROLES = ['admin', 'supervisor', 'doctor', 'receptionist', 'lab_technician', 'billing_officer', 'patient', 'pending'];
 
 function requireRole(array $allowedRoles): void
 {
@@ -188,22 +209,36 @@ function requireAdmin(): void
  */
 function roleDashboardPath(string $role): string
 {
-    switch (strtolower($role)) {
-        case 'admin':
-            return '/dashboard/index.php';
-        case 'doctor':
-            return '/doctor/dashboard.php';
-        case 'receptionist':
-            return '/appointments/index.php';
-        case 'lab_technician':
-            return '/lab/dashboard.php';
-        case 'billing_officer':
-            return '/billing/dashboard.php';
-        case 'patient':
-            return '/patient/dashboard.php';
-        default:
-            return '/auth/login.php';
-    }
+    $role = strtolower(str_replace([' ', '-'], '_', trim($role)));
+    $routes = [
+        'admin' => '/dashboard/admin.php',
+        'administrator' => '/dashboard/admin.php',
+        'supervisor' => '/dashboard/manager.php',
+        'manager' => '/dashboard/manager.php',
+        'doctor' => '/dashboard/doctor.php',
+        'receptionist' => '/dashboard/reception.php',
+        'lab_technician' => '/dashboard/laboratory.php',
+        'laboratory_scientist' => '/dashboard/laboratory.php',
+        'billing_officer' => '/dashboard/billing.php',
+        'patient' => '/dashboard/patient.php',
+        'pending' => '/dashboard/pending.php',
+    ];
+
+    return $routes[$role] ?? '/dashboard/unassigned.php';
+}
+
+function roleLandingSection(string $role): ?string
+{
+    $role = strtolower(str_replace([' ', '-'], '_', trim($role)));
+    $sections = [
+        'doctor' => 'appointments',
+        'receptionist' => 'patients',
+        'lab_technician' => 'lab',
+        'laboratory_scientist' => 'lab',
+        'billing_officer' => 'billing',
+    ];
+
+    return $sections[$role] ?? null;
 }
 
 
@@ -223,6 +258,7 @@ function getDb(): PDO
 
     try {
         $dsn = 'mysql:host=' . DB_HOST
+            . ';port=' . DB_PORT
             . ';dbname=' . DB_NAME
             . ';charset=utf8mb4';
 
@@ -239,6 +275,8 @@ function getDb(): PDO
 
         return $pdo;
     } catch (PDOException $e) {
-        die('Database connection failed: ' . htmlspecialchars($e->getMessage()));
+        error_log('Database connection failed: ' . $e->getMessage());
+        http_response_code(503);
+        die('The service is temporarily unavailable. Please try again later.');
     }
 }

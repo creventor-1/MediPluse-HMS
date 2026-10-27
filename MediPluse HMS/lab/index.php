@@ -2,12 +2,13 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireRole(['admin', 'doctor', 'lab_technician']);
+requireSectionPermission('lab', 'view');
 
 $pdo = getDb();
 $roleKey = currentRoleKey();
-$canRequest = in_array($roleKey, ['admin', 'doctor'], true);
-$canEnter = in_array($roleKey, ['admin', 'lab_technician'], true);
+$canRequest = can('lab', 'create');
+$canEnter = can('lab', 'update');
+$canDelete = can('lab', 'delete');
 $myDoctorId = $roleKey === 'doctor' ? currentDoctorId($pdo) : null;
 $message = '';
 $messageType = '';
@@ -15,7 +16,8 @@ $messageType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
-    if ($canRequest && isset($_POST['request_test'])) {
+    if (isset($_POST['request_test'])) {
+        requireSectionPermission('lab', 'create');
         $patientId = trim($_POST['patient_id'] ?? '');
         $doctorId = $roleKey === 'doctor' ? (string) $myDoctorId : trim($_POST['doctor_id'] ?? '');
         $testType = trim($_POST['test_type'] ?? '');
@@ -38,15 +40,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($roleKey === 'admin' && isset($_POST['delete_lab'])) {
-        $pdo->prepare('DELETE FROM tblLabResults WHERE labResultID = ?')->execute([trim($_POST['delete_lab'])]);
-        $message = 'Laboratory record deleted.';
-        $messageType = 'success';
+    if (isset($_POST['delete_lab'])) {
+        requireSectionPermission('lab', 'delete');
+        if ($roleKey === 'doctor') {
+            $statement = $pdo->prepare(
+                'DELETE FROM tblLabResults WHERE labResultID = ? AND requestedBy = ?'
+            );
+            $statement->execute([trim($_POST['delete_lab']), $myDoctorId ?? '']);
+        } else {
+            $statement = $pdo->prepare('DELETE FROM tblLabResults WHERE labResultID = ?');
+            $statement->execute([trim($_POST['delete_lab'])]);
+        }
+
+        if ($statement->rowCount() === 1) {
+            $message = 'Laboratory record deleted.';
+            $messageType = 'success';
+        } else {
+            $message = 'The laboratory record was not found or you do not have permission to delete it.';
+            $messageType = 'danger';
+        }
     }
 }
 
 $patientsList = $canRequest ? $pdo->query('SELECT patientID, fullName FROM tblPatients ORDER BY fullName')->fetchAll() : [];
-$doctorsList = $roleKey === 'admin' ? $pdo->query('SELECT doctorID, fullName FROM tblDoctors ORDER BY fullName')->fetchAll() : [];
+$doctorsList = $canRequest && $myDoctorId === null
+    ? $pdo->query('SELECT doctorID, fullName FROM tblDoctors ORDER BY fullName')->fetchAll()
+    : [];
 
 $sql = 'SELECT l.*, p.fullName AS patientName, d.fullName AS doctorName
         FROM tblLabResults l
@@ -99,7 +118,7 @@ require __DIR__ . '/../partials/head.php';
               <?php endforeach; ?>
             </select>
           </label>
-          <?php if ($roleKey === 'admin'): ?>
+          <?php if ($myDoctorId === null): ?>
           <label>
             Requesting doctor
             <select name="doctor_id" required>
@@ -134,7 +153,7 @@ require __DIR__ . '/../partials/head.php';
               <th>Requested by</th>
               <th>Result</th>
               <th>Date recorded</th>
-              <?php if ($canEnter || $roleKey === 'admin'): ?><th>Actions</th><?php endif; ?>
+              <?php if ($canEnter || $canDelete): ?><th>Actions</th><?php endif; ?>
             </tr>
           </thead>
           <tbody>
@@ -156,13 +175,13 @@ require __DIR__ . '/../partials/head.php';
                   <td><?php echo e($r['doctorName']); ?></td>
                   <td><?php echo $r['resultValue'] ? e($r['resultValue']) : '<span class="status pending">Pending</span>'; ?></td>
                   <td><?php echo e($r['dateRecorded'] ?: 'N/A'); ?></td>
-                  <?php if ($canEnter || $roleKey === 'admin'): ?>
+                  <?php if ($canEnter || $canDelete): ?>
                   <td>
                     <div class="list-actions">
                       <?php if ($canEnter): ?>
                       <a class="button-link secondary small" href="<?php echo e(url('/lab/edit.php?id=' . urlencode($r['labResultID']))); ?>"><?php echo $r['resultValue'] ? 'Edit result' : 'Enter result'; ?></a>
                       <?php endif; ?>
-                      <?php if ($roleKey === 'admin'): ?>
+                      <?php if ($canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this record?');">
                         <?php echo csrf_field(); ?>
                         <button type="submit" name="delete_lab" value="<?php echo e($r['labResultID']); ?>" class="button-link secondary small">Delete</button>

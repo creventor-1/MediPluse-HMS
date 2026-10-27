@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireRole(['admin', 'receptionist']);
+requireSectionPermission('patients', 'update');
 
 $pdo = getDb();
 $id = trim($_GET['id'] ?? $_POST['id'] ?? '');

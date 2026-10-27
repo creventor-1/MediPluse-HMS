@@ -2,20 +2,26 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireRole(['admin', 'lab_technician']);
+requireSectionPermission('lab', 'update');
 
 $pdo = getDb();
+$isDoctor = currentRoleKey() === 'doctor';
+$myDoctorId = $isDoctor ? currentDoctorId($pdo) : null;
 $id = trim($_GET['id'] ?? $_POST['id'] ?? '');
 
 if ($id === '') {
     redirect('/lab/index.php');
 }
 
-$stmt = $pdo->prepare(
-    'SELECT l.*, p.fullName AS patientName FROM tblLabResults l
-     JOIN tblPatients p ON p.patientID = l.patientID WHERE l.labResultID = ?'
-);
-$stmt->execute([$id]);
+$sql = 'SELECT l.*, p.fullName AS patientName FROM tblLabResults l
+        JOIN tblPatients p ON p.patientID = l.patientID WHERE l.labResultID = ?';
+$parameters = [$id];
+if ($isDoctor) {
+    $sql .= ' AND l.requestedBy = ?';
+    $parameters[] = $myDoctorId ?? '';
+}
+$stmt = $pdo->prepare($sql);
+$stmt->execute($parameters);
 $lab = $stmt->fetch();
 
 if (!$lab) {
@@ -35,8 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_result'])) {
         $message = 'Result and date recorded are required.';
         $messageType = 'danger';
     } else {
-        $pdo->prepare('UPDATE tblLabResults SET resultValue = ?, dateRecorded = ? WHERE labResultID = ?')
-            ->execute([$result, $date, $id]);
+        $updateSql = 'UPDATE tblLabResults SET resultValue = ?, dateRecorded = ? WHERE labResultID = ?';
+        $updateParameters = [$result, $date, $id];
+        if ($isDoctor) {
+            $updateSql .= ' AND requestedBy = ?';
+            $updateParameters[] = $myDoctorId ?? '';
+        }
+        $pdo->prepare($updateSql)->execute($updateParameters);
         redirect('/lab/index.php');
     }
 

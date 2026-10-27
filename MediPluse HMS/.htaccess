@@ -1,0 +1,4 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule (^|/)\.env(?:\..*)?$ - [F,L]
+RewriteRule ^database/ - [F,L]

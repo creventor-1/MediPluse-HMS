@@ -12,9 +12,20 @@ $pageTitle = $pageTitle ?? APP_NAME;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo e($pageTitle); ?> | <?php echo e(APP_NAME); ?></title>
+  <script>
+    (function () {
+      var theme = 'dark';
+      try {
+        var savedTheme = localStorage.getItem('medipulse-theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') theme = savedTheme;
+      } catch (error) {
+        theme = 'dark';
+      }
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="<?php echo e(url('assets/css/style.css')); ?>">
-  <link rel="stylesheet" href="<?php echo e(url('assets/css/style_theme.css')); ?>">
+  <link rel="stylesheet" href="<?php echo e(url('assets/css/style.css')); ?>?v=<?php echo (int) filemtime(__DIR__ . '/../assets/css/style.css'); ?>">
+  <link rel="stylesheet" href="<?php echo e(url('assets/css/style_theme.css')); ?>?v=<?php echo (int) filemtime(__DIR__ . '/../assets/css/style_theme.css'); ?>">
+  <script src="<?php echo e(url('assets/js/theme.js')); ?>?v=<?php echo (int) filemtime(__DIR__ . '/../assets/js/theme.js'); ?>" defer></script>
 </head>

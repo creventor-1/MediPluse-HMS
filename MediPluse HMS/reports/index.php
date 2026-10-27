@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireAdmin();
+requireSectionPermission('reports', 'view');
 
 $pdo = getDb();
 
@@ -39,32 +39,47 @@ $count = static function (string $table) use ($pdo): int {
 [$apptSql, $apptParams] = $range('appointmentDate');
 [$billSql, $billParams] = $range('dateIssued');
 
-$apptByStatus = $rows(
-    "SELECT status, COUNT(*) AS total FROM tblAppointments WHERE 1=1 $apptSql GROUP BY status ORDER BY status",
-    $apptParams
-);
+$canViewAppointments = can('appointments', 'view');
+$canViewDoctors = can('doctors', 'view');
+$canViewPatients = can('patients', 'view');
+$canViewStaff = can('staff', 'view');
+$canViewLab = can('lab', 'view');
+$canViewBilling = can('billing', 'view');
 
-$apptByDoctor = $rows(
-    "SELECT d.fullName, COUNT(a.appointmentID) AS total
-     FROM tblDoctors d
-     LEFT JOIN tblAppointments a ON a.doctorID = d.doctorID " . str_replace('appointmentDate', 'a.appointmentDate', $apptSql) . "
-     GROUP BY d.doctorID, d.fullName ORDER BY total DESC, d.fullName",
-    $apptParams
-);
+$apptByStatus = $canViewAppointments
+    ? $rows("SELECT status, COUNT(*) AS total FROM tblAppointments WHERE 1=1 $apptSql GROUP BY status ORDER BY status", $apptParams)
+    : [];
 
-$billing = $rows(
-    "SELECT paymentStatus, COUNT(*) AS total, COALESCE(SUM(amount), 0) AS amount
-     FROM tblBilling WHERE 1=1 $billSql GROUP BY paymentStatus",
-    $billParams
-);
+$apptByDoctor = $canViewAppointments && $canViewDoctors
+    ? $rows(
+        "SELECT d.fullName, COUNT(a.appointmentID) AS total
+         FROM tblDoctors d
+         LEFT JOIN tblAppointments a ON a.doctorID = d.doctorID " . str_replace('appointmentDate', 'a.appointmentDate', $apptSql) . "
+         GROUP BY d.doctorID, d.fullName ORDER BY total DESC, d.fullName",
+        $apptParams
+    )
+    : [];
 
+$billing = $canViewBilling
+    ? $rows(
+        "SELECT paymentStatus, COUNT(*) AS total, COALESCE(SUM(amount), 0) AS amount
+         FROM tblBilling WHERE 1=1 $billSql GROUP BY paymentStatus",
+        $billParams
+    )
+    : [];
 $billTotals = ['Paid' => ['total' => 0, 'amount' => 0], 'Unpaid' => ['total' => 0, 'amount' => 0]];
 foreach ($billing as $b) {
     $billTotals[$b['paymentStatus']] = ['total' => (int) $b['total'], 'amount' => (float) $b['amount']];
 }
 
-$labPending = (int) $pdo->query('SELECT COUNT(*) FROM tblLabResults WHERE resultValue IS NULL')->fetchColumn();
-$labDone = (int) $pdo->query('SELECT COUNT(*) FROM tblLabResults WHERE resultValue IS NOT NULL')->fetchColumn();
+$labPending = $canViewLab
+    ? (int) $pdo->query('SELECT COUNT(*) FROM tblLabResults WHERE resultValue IS NULL')->fetchColumn()
+    : null;
+$labDone = $canViewLab
+    ? (int) $pdo->query('SELECT COUNT(*) FROM tblLabResults WHERE resultValue IS NOT NULL')->fetchColumn()
+    : null;
+$hasReportData = $canViewAppointments || $canViewDoctors || $canViewPatients
+    || $canViewStaff || $canViewLab || $canViewBilling;
 
 $periodLabel = ($from !== '' || $to !== '')
     ? ($from !== '' ? $from : 'the beginning') . ' to ' . ($to !== '' ? $to : 'today')
@@ -86,6 +101,7 @@ require __DIR__ . '/../partials/head.php';
         <button type="button" class="button-link secondary" onclick="window.print()">Print report</button>
       </div>
 
+      <?php if ($hasReportData): ?>
       <section class="form-card">
         <h3>Report Period</h3>
         <p class="hint">Applies to appointments and billing. Currently showing: <?php echo e($periodLabel); ?>.</p>
@@ -104,14 +120,26 @@ require __DIR__ . '/../partials/head.php';
           </div>
         </form>
       </section>
+      <?php else: ?>
+      <section class="panel"><p class="empty-state">No source-section permissions are assigned, so no protected summaries are displayed.</p></section>
+      <?php endif; ?>
 
       <div class="stats-grid">
+        <?php if ($canViewPatients): ?>
         <div class="stat-card"><div><span class="label">Registered patients</span><strong><?php echo e($count('tblPatients')); ?></strong></div></div>
+        <?php endif; ?>
+        <?php if ($canViewDoctors): ?>
         <div class="stat-card"><div><span class="label">Doctors</span><strong><?php echo e($count('tblDoctors')); ?></strong></div></div>
+        <?php endif; ?>
+        <?php if ($canViewStaff): ?>
         <div class="stat-card"><div><span class="label">Staff accounts</span><strong><?php echo e($count('tblStaff')); ?></strong></div></div>
+        <?php endif; ?>
+        <?php if ($canViewLab): ?>
         <div class="stat-card"><div><span class="label">Lab tests (pending / done)</span><strong><?php echo e($labPending . ' / ' . $labDone); ?></strong></div></div>
+        <?php endif; ?>
       </div>
 
+      <?php if ($canViewAppointments): ?>
       <section class="panel">
         <div class="panel-header"><h3>Appointments by Status</h3></div>
         <table>
@@ -127,7 +155,9 @@ require __DIR__ . '/../partials/head.php';
           </tbody>
         </table>
       </section>
+      <?php endif; ?>
 
+      <?php if ($canViewAppointments && $canViewDoctors): ?>
       <section class="panel">
         <div class="panel-header"><h3>Appointments per Doctor</h3></div>
         <table>
@@ -143,7 +173,9 @@ require __DIR__ . '/../partials/head.php';
           </tbody>
         </table>
       </section>
+      <?php endif; ?>
 
+      <?php if ($canViewBilling): ?>
       <section class="panel">
         <div class="panel-header"><h3>Billing Summary</h3></div>
         <table>
@@ -164,6 +196,7 @@ require __DIR__ . '/../partials/head.php';
           </tbody>
         </table>
       </section>
+      <?php endif; ?>
     </main>
   </div>
 

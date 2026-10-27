@@ -2,18 +2,20 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireRole(['admin', 'receptionist', 'doctor']);
+requireSectionPermission('patients', 'view');
 
 $pdo = getDb();
-$roleKey = currentRoleKey();
-$canEdit = in_array($roleKey, ['admin', 'receptionist'], true);
+$canCreate = can('patients', 'create');
+$canUpdate = can('patients', 'update');
+$canDelete = can('patients', 'delete');
 $message = '';
 $messageType = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canEdit) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
     if (isset($_POST['save_patient'])) {
+        requireSectionPermission('patients', 'create');
         $name = trim($_POST['name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
         $address = trim($_POST['address'] ?? '');
@@ -35,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canEdit) {
     }
 
     if (isset($_POST['delete_patient'])) {
+        requireSectionPermission('patients', 'delete');
         try {
             $pdo->prepare('DELETE FROM tblPatients WHERE patientID = ?')->execute([trim($_POST['delete_patient'])]);
             $message = 'Patient deleted successfully.';
@@ -74,14 +77,14 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Records</p>
           <h2>Patients</h2>
         </div>
-        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary">Back</a>
+        <a href="<?php echo e(url(roleDashboardPath(currentRoleKey()))); ?>" class="button-link secondary">Back</a>
       </div>
 
       <?php if ($message !== ''): ?>
         <div class="alert <?php echo e($messageType); ?>"><?php echo e($message); ?></div>
       <?php endif; ?>
 
-      <?php if ($canEdit): ?>
+      <?php if ($canCreate): ?>
       <section class="form-card">
         <h3>Register Patient</h3>
         <p class="hint">A unique Patient ID is generated automatically.</p>
@@ -140,7 +143,7 @@ require __DIR__ . '/../partials/head.php';
               <th>Date of Birth</th>
               <th>Phone</th>
               <th>Registered</th>
-              <?php if ($canEdit): ?><th>Actions</th><?php endif; ?>
+              <?php if ($canUpdate || $canDelete): ?><th>Actions</th><?php endif; ?>
             </tr>
           </thead>
           <tbody>
@@ -162,14 +165,18 @@ require __DIR__ . '/../partials/head.php';
                   <td><?php echo e($patient['dateOfBirth']); ?></td>
                   <td><?php echo e($patient['phoneNumber'] ?: 'N/A'); ?></td>
                   <td><?php echo e($patient['registrationDate']); ?></td>
-                  <?php if ($canEdit): ?>
+                  <?php if ($canUpdate || $canDelete): ?>
                   <td>
                     <div class="list-actions">
+                      <?php if ($canUpdate): ?>
                       <a class="button-link secondary small" href="<?php echo e(url('/patients/edit.php?id=' . urlencode($patient['patientID']))); ?>">Edit</a>
+                      <?php endif; ?>
+                      <?php if ($canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this patient?');">
                         <?php echo csrf_field(); ?>
                         <button type="submit" name="delete_patient" value="<?php echo e($patient['patientID']); ?>" class="button-link secondary small">Delete</button>
                       </form>
+                      <?php endif; ?>
                     </div>
                   </td>
                   <?php endif; ?>

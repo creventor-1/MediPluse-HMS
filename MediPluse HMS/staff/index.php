@@ -2,10 +2,12 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireAdmin();
+requireSectionPermission('staff', 'view');
 
 $pdo = getDb();
-$roles = ['Administrator', 'Receptionist', 'Lab Technician', 'Billing Officer'];
+$roles = ['Supervisor', 'Doctor', 'Receptionist', 'Lab Technician', 'Billing Officer'];
+$canManageUsers = can('system', 'manage_users');
+$canCreate = can('staff', 'create') && $canManageUsers;
 $message = '';
 $messageType = '';
 
@@ -13,9 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
     if (isset($_POST['save_staff'])) {
+        requireSectionPermission('staff', 'create');
+        requireUserManagementPermission();
         $name = trim($_POST['name'] ?? '');
         $designation = trim($_POST['designation'] ?? '');
         $username = trim($_POST['username'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
         $role = trim($_POST['role'] ?? '');
 
@@ -25,15 +30,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!preg_match('/^[A-Za-z0-9_.-]{3,50}$/', $username)) {
             $message = 'Username must be 3-50 letters, numbers, dots, dashes or underscores.';
             $messageType = 'danger';
-        } elseif (strlen($password) < 8) {
-            $message = 'Password must be at least 8 characters.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = 'Enter a valid email address for the account.';
+            $messageType = 'danger';
+        } elseif (strlen($password) < 12) {
+            $message = 'Password must be at least 12 characters.';
             $messageType = 'danger';
         } else {
             try {
                 $pdo->beginTransaction();
                 $userId = nextId($pdo, 'tblUsers', 'userID', 'USR');
-                $pdo->prepare('INSERT INTO tblUsers (userID, username, passwordHash, role) VALUES (?, ?, ?, ?)')
-                    ->execute([$userId, $username, password_hash($password, PASSWORD_DEFAULT), $role]);
+                $pdo->prepare(
+                    'INSERT INTO tblUsers (userID, username, email, displayName, passwordHash, role, accountStatus)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)'
+                )->execute([$userId, $username, $email, $name, password_hash($password, PASSWORD_DEFAULT), $role, 'active']);
 
                 $staffId = nextId($pdo, 'tblStaff', 'staffID', 'STF');
                 $pdo->prepare('INSERT INTO tblStaff (staffID, fullName, designation, userID) VALUES (?, ?, ?, ?)')
@@ -51,6 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_POST['delete_staff'])) {
+        requireSectionPermission('staff', 'delete');
+        requireUserManagementPermission();
         $staffId = trim($_POST['delete_staff']);
         $stmt = $pdo->prepare('SELECT userID FROM tblStaff WHERE staffID = ?');
         $stmt->execute([$staffId]);
@@ -99,6 +111,7 @@ require __DIR__ . '/../partials/head.php';
         <div class="alert <?php echo e($messageType); ?>"><?php echo e($message); ?></div>
       <?php endif; ?>
 
+      <?php if ($canCreate): ?>
       <section class="form-card">
         <h3>Create Staff Account</h3>
         <p class="hint">Doctor accounts are created from the Doctors page.</p>
@@ -125,6 +138,10 @@ require __DIR__ . '/../partials/head.php';
             <input type="text" name="username" maxlength="50" autocomplete="off" required>
           </label>
           <label>
+            Email
+            <input type="email" name="email" maxlength="254" autocomplete="email" required>
+          </label>
+          <label>
             Password
             <input type="password" name="password" autocomplete="new-password" required>
           </label>
@@ -133,6 +150,7 @@ require __DIR__ . '/../partials/head.php';
           </div>
         </form>
       </section>
+      <?php endif; ?>
 
       <section class="panel">
         <div class="panel-header">
@@ -146,13 +164,13 @@ require __DIR__ . '/../partials/head.php';
               <th>Designation</th>
               <th>Username</th>
               <th>Role</th>
-              <th>Actions</th>
+              <?php if (can('staff', 'update') || (can('staff', 'delete') && $canManageUsers)): ?><th>Actions</th><?php endif; ?>
             </tr>
           </thead>
           <tbody>
             <?php if (empty($staffList)): ?>
               <tr>
-                <td colspan="6">
+                <td colspan="<?php echo can('staff', 'update') || (can('staff', 'delete') && $canManageUsers) ? 6 : 5; ?>">
                   <div class="empty-state">
                     <span class="emoji">👥</span>
                     No staff accounts found.
@@ -167,15 +185,21 @@ require __DIR__ . '/../partials/head.php';
                   <td><?php echo e($s['designation'] ?: 'N/A'); ?></td>
                   <td><?php echo e($s['username'] ?: 'N/A'); ?></td>
                   <td><?php echo e($s['role'] ?: 'N/A'); ?></td>
+                  <?php if (can('staff', 'update') || (can('staff', 'delete') && $canManageUsers)): ?>
                   <td>
                     <div class="list-actions">
+                      <?php if (can('staff', 'update')): ?>
                       <a class="button-link secondary small" href="<?php echo e(url('/staff/edit.php?id=' . urlencode($s['staffID']))); ?>">Edit</a>
+                      <?php endif; ?>
+                      <?php if (can('staff', 'delete') && $canManageUsers): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this staff account?');">
                         <?php echo csrf_field(); ?>
                         <button type="submit" name="delete_staff" value="<?php echo e($s['staffID']); ?>" class="button-link secondary small">Delete</button>
                       </form>
+                      <?php endif; ?>
                     </div>
                   </td>
+                  <?php endif; ?>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>

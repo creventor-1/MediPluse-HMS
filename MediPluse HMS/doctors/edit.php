@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../partials/helpers.php';
 
-requireAdmin();
+requireSectionPermission('doctors', 'update');
 
 $pdo = getDb();
 $id = trim($_GET['id'] ?? $_POST['id'] ?? '');
@@ -26,28 +26,18 @@ $messageType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
     verify_csrf();
+    requireSectionPermission('doctors', 'update');
 
     $name = trim($_POST['name'] ?? '');
     $specialty = trim($_POST['specialty'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
-    $password = (string) ($_POST['password'] ?? '');
 
     if ($name === '') {
         $message = 'Doctor name is required.';
         $messageType = 'danger';
-    } elseif ($password !== '' && (!$doctor['userID'] || strlen($password) < 8)) {
-        $message = $doctor['userID']
-            ? 'A new password must be at least 8 characters.'
-            : 'This doctor has no login, so a password cannot be set.';
-        $messageType = 'danger';
     } else {
         $pdo->prepare('UPDATE tblDoctors SET fullName = ?, specialty = ?, phoneNumber = ? WHERE doctorID = ?')
             ->execute([$name, $specialty ?: null, $phone ?: null, $id]);
-
-        if ($password !== '') {
-            $pdo->prepare('UPDATE tblUsers SET passwordHash = ? WHERE userID = ?')
-                ->execute([password_hash($password, PASSWORD_DEFAULT), $doctor['userID']]);
-        }
 
         redirect('/doctors/index.php');
     }
@@ -96,10 +86,6 @@ require __DIR__ . '/../partials/head.php';
             <input type="text" name="phone" maxlength="15" value="<?php echo e($doctor['phoneNumber']); ?>">
           </label>
           <?php if ($doctor['userID']): ?>
-          <label>
-            Reset password (<?php echo e($doctor['username']); ?>)
-            <input type="password" name="password" placeholder="Leave blank to keep current" autocomplete="new-password">
-          </label>
           <?php endif; ?>
           <div class="form-actions">
             <button type="submit" name="update_doctor">Save Changes</button>
