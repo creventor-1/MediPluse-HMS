@@ -1,8 +1,9 @@
 FROM php:8.2-apache
 
-# Install mysql client utilities and PHP extensions
+# Install mysql client utilities, ca-certificates (for SSL cloud DBs like Aiven), and PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     default-mysql-client \
+    ca-certificates \
     && docker-php-ext-install pdo pdo_mysql \
     && a2enmod rewrite \
     && apt-get clean \
@@ -12,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN printf '<Directory /var/www/html/>\n    Options -Indexes +FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>\n' > /etc/apache2/conf-available/override.conf \
     && a2enconf override
 
-# Copy project files
+# Copy application files
 COPY . /var/www/html/
 
 # Copy entrypoint
