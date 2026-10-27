@@ -55,8 +55,6 @@ if ((int)$tableCheck === 0) {
     $schemaSql = preg_replace('/USE\s+[^;]+;/i', '', $schemaSql);
 
     $pdo->exec($schemaSql);
-    // Flush multi-statement buffer
-    while ($pdo->nextRowset()) {}
     logMsg("Base schema created successfully.");
 } else {
     logMsg("Base schema already exists.");
@@ -83,7 +81,6 @@ if (is_dir($migrationsDir)) {
         $migrationSql = preg_replace('/USE\s+[^;]+;/i', '', $migrationSql);
 
         $pdo->exec($migrationSql);
-        while ($pdo->nextRowset()) {}
 
         $record = $pdo->prepare("INSERT INTO tbl_migrations (migration_file) VALUES (?)");
         $record->execute([$fileName]);
