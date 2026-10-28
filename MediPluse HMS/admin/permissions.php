@@ -594,7 +594,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">System Administration</p>
           <h2>Roles &amp; Permissions Manager</h2>
         </div>
-        <a class="button-link secondary" href="<?php echo e(url('/dashboard/index.php')); ?>">Back to dashboard</a>
+        <a class="button-link secondary" href="<?php echo e(url('/dashboard/index.php')); ?>"><?php echo icon('chevron-left', '', 16); ?> Back to dashboard</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -610,7 +610,7 @@ require __DIR__ . '/../partials/head.php';
       <!-- Primary Navigation Tabs -->
       <nav class="admin-subnav" aria-label="Permissions Management Sections">
         <a href="?tab=users<?php echo $selectedUserId ? '&user=' . urlencode($selectedUserId) : ''; ?>" class="<?php echo $activeTab === 'users' ? 'active' : ''; ?>">
-          <span>👥 User Accounts &amp; Individual Overrides</span>
+          <span><?php echo icon('users', '', 16); ?> User Accounts &amp; Individual Overrides</span>
           <?php if (count($pendingAccounts) > 0): ?>
             <span style="background: #ef4444; color: #fff; font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 700;">
               <?php echo count($pendingAccounts); ?> Pending
@@ -618,7 +618,7 @@ require __DIR__ . '/../partials/head.php';
           <?php endif; ?>
         </a>
         <a href="?tab=roles<?php echo $selectedRoleKey ? '&role=' . urlencode($selectedRoleKey) : ''; ?>" class="<?php echo $activeTab === 'roles' ? 'active' : ''; ?>">
-          <span>🛡️ Role Permission Templates (Baseline Defaults)</span>
+          <span><?php echo icon('shield-check', '', 16); ?> Role Permission Templates (Baseline Defaults)</span>
         </a>
       </nav>
 
@@ -628,7 +628,7 @@ require __DIR__ . '/../partials/head.php';
         <!-- ========================================== -->
 
         <div class="concept-box">
-          <h4>💡 How User Roles &amp; Overrides Work</h4>
+          <h4><?php echo icon('info', '', 16); ?> How User Roles &amp; Overrides Work</h4>
           <p>
             Every user account belongs to a <strong>Role</strong> and automatically inherits that role’s default permissions.
             Use this screen to manage accounts, approve pending staff signups, and apply <strong>custom overrides</strong> (e.g. granting extra access or revoking standard access) for a specific employee.
@@ -640,7 +640,7 @@ require __DIR__ . '/../partials/head.php';
           <section class="panel" style="border-left: 4px solid #f59e0b; background: #fffdf5; padding: 18px 20px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
             <div style="margin-bottom: 12px;">
               <h3 style="margin:0 0 4px; font-size:1.05rem; color:#92400e; display:flex; align-items:center; gap:8px;">
-                <span>⚠️</span> Staff Accounts Awaiting Review (<?php echo count($pendingAccounts); ?>)
+                <span><?php echo icon('alert-triangle', '', 18); ?></span> Staff Accounts Awaiting Review (<?php echo count($pendingAccounts); ?>)
               </h3>
               <p style="margin:0; font-size:0.86rem; color:#b45309;">
                 The following staff accounts have submitted registration requests. Review their requested role and activate their account.
@@ -741,7 +741,7 @@ require __DIR__ . '/../partials/head.php';
         <section class="form-card" id="user-editor">
           <?php if (!$selectedUser): ?>
             <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-              <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">👤</span>
+              <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;"><?php echo icon('user', '', 40); ?></span>
               <h3 style="margin: 0 0 6px; color: #1e293b;">Select an Account to Manage</h3>
               <p style="margin: 0; font-size: 0.9rem;">Choose any user from the directory table above to view their details, change their role, or apply custom permission overrides.</p>
             </div>
@@ -902,7 +902,7 @@ require __DIR__ . '/../partials/head.php';
         <!-- ========================================== -->
 
         <div class="concept-box">
-          <h4>🛡️ What Role Permission Templates Do</h4>
+          <h4><?php echo icon('shield-check', '', 16); ?> What Role Permission Templates Do</h4>
           <p>
             Role templates define the baseline permissions for each job position in the hospital.
             When a staff member is assigned a role (e.g., Doctor, Receptionist, Lab Technician), they automatically inherit these settings without needing custom configuration.
