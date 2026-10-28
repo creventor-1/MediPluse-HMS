@@ -8,6 +8,119 @@ if (isset($_SESSION['user'])) {
 $pageTitle = 'Hospital care, connected';
 require __DIR__ . '/partials/head.php';
 ?>
+<style>
+  .home-portal-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 26px;
+  }
+  .home-portal-card {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 16px;
+    padding: 22px 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .home-portal-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.09);
+  }
+  .home-portal-card.patient-card {
+    border-top: 4px solid #0284c7;
+  }
+  .home-portal-card.staff-card {
+    border-top: 4px solid #0d9488;
+  }
+  .portal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    width: fit-content;
+    margin-bottom: 10px;
+  }
+  .patient-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+  .staff-badge {
+    background: #ccfbf1;
+    color: #0f766e;
+  }
+  .home-portal-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px;
+  }
+  .home-portal-card p {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 16px;
+    flex-grow: 1;
+  }
+  .portal-card-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .portal-btn-patient {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    color: #ffffff !important;
+    justify-content: center;
+    padding: 10px 18px !important;
+    font-size: 0.9rem !important;
+    border-radius: 10px !important;
+  }
+  .portal-btn-staff {
+    background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+    color: #ffffff !important;
+    justify-content: center;
+    padding: 10px 18px !important;
+    font-size: 0.9rem !important;
+    border-radius: 10px !important;
+  }
+  .portal-register-link {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    text-align: center;
+    text-decoration: none;
+    padding: 4px;
+    transition: color 0.15s ease;
+  }
+  .portal-register-link:hover {
+    color: #0284c7;
+    text-decoration: underline;
+  }
+  .home-patient-nav-btn {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #0284c7 !important;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(2, 132, 199, 0.09);
+    transition: background 0.15s ease;
+  }
+  .home-patient-nav-btn:hover {
+    background: rgba(2, 132, 199, 0.18);
+  }
+</style>
 <body class="landing public-home">
   <a class="home-skip-link" href="#main-content">Skip to content</a>
 
@@ -26,30 +139,73 @@ require __DIR__ . '/partials/head.php';
     </nav>
 
     <div class="home-nav-actions">
-      <a class="home-login-link" href="<?php echo e(url('/auth/login.php')); ?>">Staff sign in</a>
-      <a class="home-button home-button-small" href="<?php echo e(url('/auth/signup.php')); ?>">Request access</a>
+      <a class="home-patient-nav-btn" href="<?php echo e(url('/auth/login.php?type=patient')); ?>" title="Access Patient Portal">
+        👤 Patient Portal
+      </a>
+      <a class="home-login-link" href="<?php echo e(url('/auth/login.php?type=staff')); ?>" title="Sign in as Staff">
+        🩺 Staff Sign In
+      </a>
+      <a class="home-button home-button-small" href="<?php echo e(url('/auth/signup.php?type=patient')); ?>">
+        Register
+      </a>
     </div>
   </header>
 
   <main id="main-content">
     <section class="home-hero" id="platform">
       <div class="home-hero-copy">
-        <span class="home-eyebrow"><span class="home-eyebrow-dot"></span> A connected workspace for hospital teams</span>
+        <span class="home-eyebrow"><span class="home-eyebrow-dot"></span> Connected Healthcare Platform</span>
         <h1>Better organised care starts <span>with a clearer view.</span></h1>
         <p class="home-lead">
-          Bring patient records, appointments, laboratory results and hospital operations together
-          in one secure workspace for authorised staff.
+          Providing patients with direct access to their health records, test results, and appointments—and giving hospital clinical teams a unified operational workspace.
         </p>
-        <div class="home-hero-actions">
-          <a class="home-button" href="<?php echo e(url('/auth/login.php')); ?>">
-            Open staff workspace
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-          <a class="home-secondary-link" href="#work-areas">Explore the platform <span aria-hidden="true">↓</span></a>
+
+        <!-- Dual-Portal Pathways for Patients & Staff -->
+        <div class="home-portal-cards">
+          <!-- Patient Portal Card -->
+          <div class="home-portal-card patient-card">
+            <div>
+              <div class="portal-badge patient-badge">👤 For Patients &amp; Visitors</div>
+              <h3>Patient Health Portal</h3>
+              <p>View laboratory results, review hospital bills, and book consultations with specialist doctors.</p>
+            </div>
+            <div class="portal-card-buttons">
+              <a class="home-button portal-btn-patient" href="<?php echo e(url('/auth/login.php?type=patient')); ?>">
+                Patient Sign In
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <a class="portal-register-link" href="<?php echo e(url('/auth/signup.php?type=patient')); ?>">
+                Create patient account →
+              </a>
+            </div>
+          </div>
+
+          <!-- Staff Workspace Card -->
+          <div class="home-portal-card staff-card">
+            <div>
+              <div class="portal-badge staff-badge">🩺 For Hospital Staff</div>
+              <h3>Staff &amp; Clinical Workspace</h3>
+              <p>Operational access for Doctors, Receptionists, Lab Scientists, Billing Officers, and Administration.</p>
+            </div>
+            <div class="portal-card-buttons">
+              <a class="home-button portal-btn-staff" href="<?php echo e(url('/auth/login.php?type=staff')); ?>">
+                Staff Sign In
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <a class="portal-register-link" href="<?php echo e(url('/auth/signup.php?type=staff')); ?>">
+                Request staff access →
+              </a>
+            </div>
+          </div>
         </div>
+
+        <div class="home-hero-actions" style="margin-top: 24px;">
+          <a class="home-secondary-link" href="#work-areas">Explore hospital departments <span aria-hidden="true">↓</span></a>
+        </div>
+
         <div class="home-hero-note">
           <span class="home-note-icon" aria-hidden="true">✓</span>
-          <span>Access is assigned by role and permission—not by job title alone.</span>
+          <span>Patients register directly with instant access; staff accounts require administrative authorization.</span>
         </div>
       </div>
 
@@ -61,12 +217,12 @@ require __DIR__ . '/partials/head.php';
               <span class="preview-mark" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
               </span>
-              <span>MediPulse <small>STAFF WORKSPACE</small></span>
+              <span>MediPulse <small>HEALTHCARE WORKSPACE</small></span>
             </div>
             <span class="preview-avatar" aria-hidden="true">MP</span>
           </div>
           <div class="preview-heading">
-            <div><span>YOUR WORKSPACE</span><h2>Care, in context.</h2></div>
+            <div><span>CONNECTED CARE</span><h2>Care, in context.</h2></div>
             <span class="preview-date">TODAY</span>
           </div>
           <div class="preview-metrics">
@@ -168,25 +324,29 @@ require __DIR__ . '/partials/head.php';
       <div class="home-access-copy">
         <span class="home-section-kicker">ACCESS THAT MAKES SENSE</span>
         <h2>The right information, for the right role.</h2>
-        <p>Permissions are managed independently for each work area. A job title does not automatically unlock every record or action.</p>
-        <a class="home-text-link" href="<?php echo e(url('/auth/signup.php')); ?>">Request a staff account <span aria-hidden="true">→</span></a>
+        <p>Permissions are managed independently for each work area. Patients enjoy private personal portals, while clinician and staff actions are role-protected.</p>
+        <div style="display:flex; gap:16px; margin-top:14px;">
+          <a class="home-text-link" href="<?php echo e(url('/auth/signup.php?type=patient')); ?>">Register as a Patient <span aria-hidden="true">→</span></a>
+          <a class="home-text-link" href="<?php echo e(url('/auth/signup.php?type=staff')); ?>">Apply for staff access <span aria-hidden="true">→</span></a>
+        </div>
       </div>
       <div class="home-access-list">
-        <div><span class="access-check" aria-hidden="true">✓</span><span><strong>Assigned access</strong><small>Sections and actions are permission-controlled.</small></span></div>
-        <div><span class="access-check" aria-hidden="true">✓</span><span><strong>Protected pages</strong><small>Access is checked when a page is opened, too.</small></span></div>
-        <div><span class="access-check" aria-hidden="true">✓</span><span><strong>Account approval</strong><small>New staff requests wait for authorised review.</small></span></div>
+        <div><span class="access-check" aria-hidden="true">✓</span><span><strong>Patient Privacy</strong><small>Patients only view their own appointments, results, and bills.</small></span></div>
+        <div><span class="access-check" aria-hidden="true">✓</span><span><strong>Protected Clinical Pages</strong><small>Staff access is strictly checked by assigned section permissions.</small></span></div>
+        <div><span class="access-check" aria-hidden="true">✓</span><span><strong>Account Approval</strong><small>New staff requests wait for authorized administrative review.</small></span></div>
       </div>
     </section>
 
     <section class="home-cta">
       <div>
         <span class="home-section-kicker">MEDIPULSE HMS</span>
-        <h2>Ready to get to work?</h2>
-        <p>Sign in to continue to your authorised hospital workspace.</p>
+        <h2>Ready to access your care or workspace?</h2>
+        <p>Sign in to your private patient portal or your authorized hospital department.</p>
       </div>
       <div class="home-cta-actions">
-        <a class="home-button home-button-light" href="<?php echo e(url('/auth/login.php')); ?>">Staff sign in <span aria-hidden="true">→</span></a>
-        <a class="home-cta-request" href="<?php echo e(url('/auth/signup.php')); ?>">Request access</a>
+        <a class="home-button home-button-light" href="<?php echo e(url('/auth/login.php?type=patient')); ?>">Patient Portal <span aria-hidden="true">→</span></a>
+        <a class="home-button" href="<?php echo e(url('/auth/login.php?type=staff')); ?>" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.4); color: #fff;">Staff Sign In <span aria-hidden="true">→</span></a>
+        <a class="home-cta-request" href="<?php echo e(url('/auth/signup.php?type=patient')); ?>">Register as Patient</a>
       </div>
     </section>
   </main>
@@ -196,8 +356,12 @@ require __DIR__ . '/partials/head.php';
       <span class="home-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
       <span><?php echo e(APP_NAME); ?><small>Hospital Management</small></span>
     </a>
-    <p>© <?php echo e(date('Y')); ?> <?php echo e(APP_NAME); ?> · Hospital operations, connected.</p>
-    <a href="<?php echo e(url('/auth/login.php')); ?>">Staff sign in</a>
+    <p>© <?php echo e(date('Y')); ?> <?php echo e(APP_NAME); ?> · Hospital care and operations, connected.</p>
+    <div style="display:flex; gap:16px;">
+      <a href="<?php echo e(url('/auth/login.php?type=patient')); ?>">Patient Portal</a>
+      <span style="opacity:0.4;">·</span>
+      <a href="<?php echo e(url('/auth/login.php?type=staff')); ?>">Staff sign in</a>
+    </div>
   </footer>
 </body>
 </html>

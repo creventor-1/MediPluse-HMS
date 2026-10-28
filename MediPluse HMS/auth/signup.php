@@ -7,7 +7,7 @@ if (isset($_SESSION['user'])) {
 }
 
 $error = '';
-$activeTab = 'patient';
+$activeTab = ($_GET['type'] ?? '') === 'staff' ? 'staff' : 'patient';
 
 // Patient form fields
 $patientName = '';
