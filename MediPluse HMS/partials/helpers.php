@@ -4,6 +4,8 @@
  * Load with: require_once __DIR__ . '/../partials/helpers.php';  (after config.php)
  */
 
+require_once __DIR__ . '/icons.php';
+
 /** Generates the next ID such as PAT0001, DOC0002, APT0003 (fits VARCHAR(10)). */
 function nextId(PDO $pdo, string $table, string $column, string $prefix, int $width = 4): string
 {
