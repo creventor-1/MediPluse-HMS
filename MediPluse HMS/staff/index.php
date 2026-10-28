@@ -104,7 +104,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Administration</p>
           <h2>Staff Accounts</h2>
         </div>
-        <a href="<?php echo e(url('/dashboard/index.php')); ?>" class="button-link secondary">Back to dashboard</a>
+        <a href="<?php echo e(url('/dashboard/index.php')); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back to dashboard</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -146,7 +146,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="password" name="password" autocomplete="new-password" required>
           </label>
           <div class="form-actions">
-            <button type="submit" name="save_staff">Create Account</button>
+            <button type="submit" name="save_staff"><?php echo icon('user-plus', '', 16); ?> Create Account</button>
           </div>
         </form>
       </section>
@@ -171,10 +171,7 @@ require __DIR__ . '/../partials/head.php';
             <?php if (empty($staffList)): ?>
               <tr>
                 <td colspan="<?php echo can('staff', 'update') || (can('staff', 'delete') && $canManageUsers) ? 6 : 5; ?>">
-                  <div class="empty-state">
-                    <span class="emoji">👥</span>
-                    No staff accounts found.
-                  </div>
+                  <?php echo renderEmptyState('users', 'No staff accounts found', 'Staff accounts created here can access assigned hospital modules.'); ?>
                 </td>
               </tr>
             <?php else: ?>
@@ -189,12 +186,12 @@ require __DIR__ . '/../partials/head.php';
                   <td>
                     <div class="list-actions">
                       <?php if (can('staff', 'update')): ?>
-                      <a class="button-link secondary small" href="<?php echo e(url('/staff/edit.php?id=' . urlencode($s['staffID']))); ?>">Edit</a>
+                      <a class="button-link secondary small" href="<?php echo e(url('/staff/edit.php?id=' . urlencode($s['staffID']))); ?>"><?php echo icon('edit', '', 14); ?> Edit</a>
                       <?php endif; ?>
                       <?php if (can('staff', 'delete') && $canManageUsers): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this staff account?');">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" name="delete_staff" value="<?php echo e($s['staffID']); ?>" class="button-link secondary small">Delete</button>
+                        <button type="submit" name="delete_staff" value="<?php echo e($s['staffID']); ?>" class="button-link secondary small"><?php echo icon('trash-2', '', 14); ?> Delete</button>
                       </form>
                       <?php endif; ?>
                     </div>
