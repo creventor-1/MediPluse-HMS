@@ -134,7 +134,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Scheduling</p>
           <h2>Appointments</h2>
         </div>
-        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary">Back</a>
+        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -180,7 +180,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="time" name="time" required>
           </label>
           <div class="form-actions">
-            <button type="submit" name="save_appointment">Book Appointment</button>
+            <button type="submit" name="save_appointment"><?php echo icon('calendar', '', 16); ?> Book Appointment</button>
           </div>
         </form>
       </section>
@@ -209,10 +209,7 @@ require __DIR__ . '/../partials/head.php';
             <?php if (empty($appointments)): ?>
               <tr>
                 <td colspan="<?php echo 8 + (int) $canViewAssignedPatientDetails + (int) ($canUpdate || $canDelete); ?>">
-                  <div class="empty-state">
-                    <span class="emoji">📅</span>
-                    <?php echo $canBook ? 'No appointments found. Book an appointment above to add a record.' : 'No appointments found.'; ?>
-                  </div>
+                  <?php echo renderEmptyState('calendar', 'No appointments found', $canBook ? 'Book an appointment above to add a record.' : 'No appointments found.'); ?>
                 </td>
               </tr>
             <?php else: ?>
@@ -248,18 +245,18 @@ require __DIR__ . '/../partials/head.php';
                   <td><?php echo e($a['attendedByName'] ?: 'Not recorded'); ?></td>
                   <td><?php echo e($a['appointmentDate']); ?></td>
                   <td><?php echo e(substr($a['appointmentTime'], 0, 5)); ?></td>
-                  <td><span class="status <?php echo e(strtolower($a['status'])); ?>"><?php echo e($a['status']); ?></span></td>
+                  <td><?php echo statusBadge($a['status']); ?></td>
                   <?php if ($canUpdate || $canDelete): ?>
                   <td>
                     <div class="list-actions">
                       <?php $isAssignedDoctor = $roleKey !== 'doctor' || $a['doctorID'] === $myDoctorId; ?>
                       <?php if ($isAssignedDoctor && $canUpdate): ?>
-                      <a class="button-link secondary small" href="<?php echo e(url('/appointments/edit.php?id=' . urlencode($a['appointmentID']))); ?>">Edit</a>
+                      <a class="button-link secondary small" href="<?php echo e(url('/appointments/edit.php?id=' . urlencode($a['appointmentID']))); ?>"><?php echo icon('edit', '', 14); ?> Edit</a>
                       <?php endif; ?>
                       <?php if ($isAssignedDoctor && $canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this appointment?');">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" name="delete_appointment" value="<?php echo e($a['appointmentID']); ?>" class="button-link secondary small">Delete</button>
+                        <button type="submit" name="delete_appointment" value="<?php echo e($a['appointmentID']); ?>" class="button-link secondary small"><?php echo icon('trash-2', '', 14); ?> Delete</button>
                       </form>
                       <?php endif; ?>
                       <?php if (!$isAssignedDoctor): ?><span class="hint">View only</span><?php endif; ?>
