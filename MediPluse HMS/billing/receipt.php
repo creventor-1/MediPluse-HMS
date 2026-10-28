@@ -63,8 +63,8 @@ require __DIR__ . '/../partials/head.php';
 
     <p class="receipt-note">This receipt confirms that the payment above was recorded by hospital staff.</p>
     <div class="receipt-actions">
-      <button type="button" onclick="window.print()">Print receipt</button>
-      <a class="button-link secondary" href="<?php echo e(url('/billing/index.php')); ?>">Back to billing</a>
+      <button type="button" onclick="window.print()"><?php echo icon('printer', '', 16); ?> Print receipt</button>
+      <a class="button-link secondary" href="<?php echo e(url('/billing/index.php')); ?>"><?php echo icon('chevron-left', '', 16); ?> Back to billing</a>
     </div>
   </main>
 </body>

@@ -351,7 +351,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Finance</p>
           <h2>Billing</h2>
         </div>
-        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary">Back</a>
+        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -365,7 +365,7 @@ require __DIR__ . '/../partials/head.php';
         <div class="panel-header"><h3>Patient payment requests</h3></div>
         <p class="hint">Only confirm after you have actually received the cash or verified the bank/card payment. Confirming records the payment and updates the bill.</p>
         <?php if ($patientPaymentRequests === []): ?>
-          <div class="empty-state">No patient payment requests are awaiting verification.</div>
+          <?php echo renderEmptyState('receipt', 'No pending payment requests', 'No patient payment requests are awaiting verification.'); ?>
         <?php else: ?>
           <div class="table-wrap">
             <table>
@@ -423,7 +423,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required>
           </label>
           <div class="form-actions">
-            <button type="submit" name="generate_bill">Generate Bill</button>
+            <button type="submit" name="generate_bill"><?php echo icon('receipt', '', 16); ?> Generate Bill</button>
           </div>
         </form>
       </section>
@@ -451,10 +451,7 @@ require __DIR__ . '/../partials/head.php';
             <?php if (empty($bills)): ?>
               <tr>
                 <td colspan="<?php echo ($canUpdate || $canDelete) ? 9 : 8; ?>">
-                  <div class="empty-state">
-                    <span class="emoji">💳</span>
-                    No bills generated yet.
-                  </div>
+                  <?php echo renderEmptyState('credit-card', 'No bills generated yet', 'Billing records and invoices will appear here once generated.'); ?>
                 </td>
               </tr>
             <?php else: ?>
@@ -467,7 +464,7 @@ require __DIR__ . '/../partials/head.php';
                   <?php $balance = max(0, (float) $bill['amount'] - (float) $bill['paidAmount']); ?>
                   <td><?php echo e(number_format((float) $bill['paidAmount'], 2)); ?></td>
                   <td><?php echo e(number_format($balance, 2)); ?></td>
-                  <td><span class="status <?php echo e(strtolower($bill['paymentStatus'])); ?>"><?php echo e($bill['paymentStatus']); ?></span></td>
+                  <td><?php echo statusBadge($bill['paymentStatus']); ?></td>
                   <td><?php echo e($bill['dateIssued'] ?: 'N/A'); ?></td>
                   <?php if ($canUpdate || $canDelete): ?>
                   <td>
@@ -489,13 +486,13 @@ require __DIR__ . '/../partials/head.php';
                         <label>Reference (optional)
                           <input type="text" name="reference" maxlength="100">
                         </label>
-                        <button type="submit" name="record_payment" value="1" class="button-link small">Record &amp; receipt</button>
+                        <button type="submit" name="record_payment" value="1" class="button-link small"><?php echo icon('check', '', 14); ?> Record &amp; receipt</button>
                       </form>
                       <?php endif; ?>
                       <?php if ($canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this bill?');">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" name="delete_bill" value="<?php echo e($bill['billID']); ?>" class="button-link secondary small">Delete</button>
+                        <button type="submit" name="delete_bill" value="<?php echo e($bill['billID']); ?>" class="button-link secondary small"><?php echo icon('trash-2', '', 14); ?> Delete</button>
                       </form>
                       <?php endif; ?>
                     </div>
@@ -510,7 +507,7 @@ require __DIR__ . '/../partials/head.php';
                       <td><?php echo e(number_format((float) $payment['amount'], 2)); ?></td>
                       <td colspan="3"><?php echo e($payment['receivedAt']); ?></td>
                       <td colspan="<?php echo $canUpdate || $canDelete ? 2 : 1; ?>">
-                        <a class="button-link secondary small" href="<?php echo e(url('/billing/receipt.php?payment=' . rawurlencode($payment['paymentID']))); ?>" target="_blank" rel="noopener">View receipt</a>
+                        <a class="button-link secondary small" href="<?php echo e(url('/billing/receipt.php?payment=' . rawurlencode($payment['paymentID']))); ?>" target="_blank" rel="noopener"><?php echo icon('printer', '', 14); ?> View receipt</a>
                       </td>
                     </tr>
                   <?php endforeach; ?>
