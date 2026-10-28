@@ -178,7 +178,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Staff</p>
           <h2>Doctors</h2>
         </div>
-        <a href="<?php echo e(url('/dashboard/index.php')); ?>" class="button-link secondary">Back to dashboard</a>
+        <a href="<?php echo e(url('/dashboard/index.php')); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back to dashboard</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -216,7 +216,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="password" name="password" autocomplete="new-password">
           </label>
           <div class="form-actions">
-            <button type="submit" name="save_doctor">Save Doctor</button>
+            <button type="submit" name="save_doctor"><?php echo icon('user-plus', '', 16); ?> Save Doctor</button>
           </div>
         </form>
       </section>
@@ -241,10 +241,7 @@ require __DIR__ . '/../partials/head.php';
             <?php if (empty($doctors)): ?>
               <tr>
                 <td colspan="<?php echo $canUpdate || $canDelete || $canManageUsers ? 6 : 5; ?>">
-                  <div class="empty-state">
-                    <span class="emoji">🩺</span>
-                    No doctors found.
-                  </div>
+                  <?php echo renderEmptyState('stethoscope', 'No doctors found', 'Add a doctor profile above to build your medical directory.'); ?>
                 </td>
               </tr>
             <?php else: ?>
@@ -277,12 +274,12 @@ require __DIR__ . '/../partials/head.php';
                       </form>
                       <?php endif; ?>
                       <?php if ($canUpdate): ?>
-                      <a class="button-link secondary small" href="<?php echo e(url('/doctors/edit.php?id=' . urlencode($doctor['doctorID']))); ?>">Edit</a>
+                      <a class="button-link secondary small" href="<?php echo e(url('/doctors/edit.php?id=' . urlencode($doctor['doctorID']))); ?>"><?php echo icon('edit', '', 14); ?> Edit</a>
                       <?php endif; ?>
                       <?php if ($canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this doctor?');">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" name="delete_doctor" value="<?php echo e($doctor['doctorID']); ?>" class="button-link secondary small">Delete</button>
+                        <button type="submit" name="delete_doctor" value="<?php echo e($doctor['doctorID']); ?>" class="button-link secondary small"><?php echo icon('trash-2', '', 14); ?> Delete</button>
                       </form>
                       <?php endif; ?>
                     </div>

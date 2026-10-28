@@ -60,7 +60,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Staff</p>
           <h2>Edit Doctor</h2>
         </div>
-        <a href="<?php echo e(url('/doctors/index.php')); ?>" class="button-link secondary">Back to doctors</a>
+        <a href="<?php echo e(url('/doctors/index.php')); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back to doctors</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -88,7 +88,7 @@ require __DIR__ . '/../partials/head.php';
           <?php if ($doctor['userID']): ?>
           <?php endif; ?>
           <div class="form-actions">
-            <button type="submit" name="update_doctor">Save Changes</button>
+            <button type="submit" name="update_doctor"><?php echo icon('check', '', 16); ?> Save Changes</button>
             <a href="<?php echo e(url('/doctors/index.php')); ?>" class="button-link secondary">Cancel</a>
           </div>
         </form>
