@@ -503,6 +503,45 @@ require __DIR__ . '/../partials/head.php';
     border-color: #0284c7;
     box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
   }
+  .role-template-form {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+  }
+  .role-template-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+  }
+  .role-template-panel .table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .role-template-panel table {
+    width: 100% !important;
+    min-width: 640px;
+    border-collapse: collapse;
+  }
+  @media (min-width: 901px) {
+    .role-template-panel table {
+      display: table !important;
+    }
+  }
+  .role-template-panel th,
+  .role-template-panel td {
+    padding: 12px 16px;
+  }
+  .role-checkbox-custom {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #0284c7;
+    vertical-align: middle;
+  }
   .concept-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -884,35 +923,43 @@ require __DIR__ . '/../partials/head.php';
           </div>
 
           <?php if ($selectedRoleKey === currentRoleKey()): ?>
-            <div class="alert info" style="margin-top: 14px;">
+            <div class="alert info" style="margin-top: 16px;">
               You cannot edit the permission template for your own role (<?php echo e($roleNamesByKey[$selectedRoleKey] ?? $selectedRoleKey); ?>) while signed in.
             </div>
           <?php else: ?>
-            <form method="POST" class="form-grid" style="margin-top: 14px;">
+            <form method="POST" class="role-template-form" style="width: 100%; display: block; margin-top: 16px;">
               <?php echo csrf_field(); ?>
               <input type="hidden" name="role_key" value="<?php echo e($selectedRoleKey); ?>">
 
-              <div class="panel" style="width: 100%;">
-                <div style="padding: 12px 18px; border-bottom: 1px solid #e2e8f0; background: #fafafa;">
-                  <strong style="color: #1e293b;">Baseline Grants for Role: <?php echo e($roleNamesByKey[$selectedRoleKey] ?? $selectedRoleKey); ?></strong>
+              <div class="panel role-template-panel" style="width: 100%; box-sizing: border-box; margin-bottom: 18px;">
+                <div class="panel-header" style="padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border);">
+                  <div>
+                    <h3 style="margin: 0 0 4px; font-size: 1.05rem;">Baseline Grants for Role: <?php echo e($roleNamesByKey[$selectedRoleKey] ?? $selectedRoleKey); ?></h3>
+                    <p class="hint" style="margin: 0; font-size: 0.84rem;">Check the permissions that accounts with the <strong><?php echo e($roleNamesByKey[$selectedRoleKey] ?? $selectedRoleKey); ?></strong> role receive by default.</p>
+                  </div>
+                  <span class="role-badge" style="background: rgba(2, 132, 199, 0.12); color: #0284c7; font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 700;">
+                    <?php echo e($roleNamesByKey[$selectedRoleKey] ?? $selectedRoleKey); ?>
+                  </span>
                 </div>
                 <div class="table-wrap">
                   <table>
                     <thead>
                       <tr>
-                        <th>Hospital Section</th>
+                        <th style="text-align: left; width: 40%; padding: 12px 16px;">Hospital Section</th>
                         <?php foreach ($actions as $action): ?>
-                          <th style="text-align: center;"><?php echo e(ucfirst($action)); ?></th>
+                          <th style="text-align: center; width: 15%; padding: 12px 10px;"><?php echo e(ucfirst($action)); ?></th>
                         <?php endforeach; ?>
                       </tr>
                     </thead>
                     <tbody>
                       <?php foreach ($sections as $sectionKey => $section): ?>
                         <tr>
-                          <td><strong><?php echo e($section['label']); ?></strong></td>
+                          <td style="padding: 12px 16px; vertical-align: middle;">
+                            <strong><?php echo e($section['label']); ?></strong>
+                          </td>
                           <?php foreach ($actions as $action): ?>
-                            <td style="text-align: center;">
-                              <input type="checkbox" name="role_permissions[<?php echo e($sectionKey); ?>][<?php echo e($action); ?>]" value="1" aria-label="<?php echo e($section['label'] . ' ' . $action); ?>" <?php echo isset($rolePermissions[$sectionKey][$action]) ? 'checked' : ''; ?> style="width: 18px; height: 18px; cursor: pointer;">
+                            <td style="text-align: center; padding: 12px 10px; vertical-align: middle;">
+                              <input type="checkbox" class="role-checkbox-custom" name="role_permissions[<?php echo e($sectionKey); ?>][<?php echo e($action); ?>]" value="1" aria-label="<?php echo e($section['label'] . ' ' . $action); ?>" <?php echo isset($rolePermissions[$sectionKey][$action]) ? 'checked' : ''; ?>>
                             </td>
                           <?php endforeach; ?>
                         </tr>
@@ -922,8 +969,9 @@ require __DIR__ . '/../partials/head.php';
                 </div>
               </div>
 
-              <div class="form-actions" style="margin-top: 18px;">
+              <div class="form-actions" style="margin-top: 18px; display: flex; align-items: center; gap: 14px;">
                 <button type="submit" name="save_role_permissions">Save role template</button>
+                <span class="hint" style="margin: 0; font-size: 0.84rem;">Updates baseline grants across all active accounts assigned to <?php echo e($roleNamesByKey[$selectedRoleKey] ?? $selectedRoleKey); ?>.</span>
               </div>
             </form>
           <?php endif; ?>
