@@ -675,7 +675,7 @@ require __DIR__ . '/../partials/head.php';
               <h3 style="margin:0;">User Directory (<?php echo count($users); ?> accounts)</h3>
               <p class="hint" style="margin:3px 0 0;">Click "Manage" on any user to review their role, status, or set individual permission overrides.</p>
             </div>
-            <input type="text" id="user-search-input" placeholder="🔍 Search by name, username, or role..." style="max-width: 300px; padding: 7px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.88rem;">
+            <input type="text" id="user-search-input" placeholder="Search by name, username, or role..." style="max-width: 300px; padding: 7px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.88rem;">
           </div>
 
           <div class="panel">

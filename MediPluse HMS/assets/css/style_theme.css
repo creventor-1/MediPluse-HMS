@@ -248,6 +248,18 @@ button.danger:hover {
   background: #dc2626;
 }
 
+/* Accessibility: Focus Visible Rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
 /* Inputs & Form Grid */
 .form-grid input,
 .form-grid textarea,
