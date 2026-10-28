@@ -6,3 +6,11 @@
 /node_modules/
 .DS_Store
 Thumbs.db
+
+# Evaluation and test outputs
+evaluation_results.json
+full_system_verification.json
+
+# Local editor settings
+.vscode/
+.idea/
