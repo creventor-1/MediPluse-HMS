@@ -613,6 +613,26 @@ body:has(.theme-toggle-inline) .theme-toggle {
   flex-shrink: 0;
 }
 
+.stat-card .stat-icon svg,
+.dashboard-metric-icon svg,
+.dashboard-work-icon svg,
+.dashboard-work-arrow svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.stat-card .stat-icon svg,
+.dashboard-metric-icon svg,
+.dashboard-work-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dashboard-work-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
 .stat-card .stat-content {
   display: flex;
   flex-direction: column;

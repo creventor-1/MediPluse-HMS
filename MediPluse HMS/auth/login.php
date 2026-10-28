@@ -80,18 +80,18 @@ require __DIR__ . '/../partials/head.php';
 <body class="auth-body">
   <div class="auth-card login-card" style="width: min(540px, 100%);">
     <div class="brand-box">
-      <div class="brand-mark">🩺</div>
+      <div class="brand-mark"><?php echo icon('stethoscope', 'brand-icon-svg', 28); ?></div>
       <h1><?php echo e(APP_NAME); ?></h1>
       <p>Healthcare &amp; Hospital Management</p>
     </div>
 
     <!-- Portal Mode Selector Tabs -->
     <div class="login-tabs" role="tablist" style="display:flex; gap:8px; margin: 16px 0 20px; background:#f1f5f9; padding:6px; border-radius:12px;">
-      <button type="button" class="tab-trigger <?php echo $activeTab === 'patient' ? 'active' : ''; ?>" id="tab-patient-login" role="tab" aria-selected="<?php echo $activeTab === 'patient' ? 'true' : 'false'; ?>" aria-controls="pane-patient-login" style="flex:1; padding:10px 14px; border-radius:8px; border:none; font-weight:600; cursor:pointer; background:<?php echo $activeTab === 'patient' ? '#ffffff' : 'transparent'; ?>; color:<?php echo $activeTab === 'patient' ? '#0284c7' : '#64748b'; ?>; box-shadow:<?php echo $activeTab === 'patient' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; ?>;">
-        👤 Patient Portal
+      <button type="button" class="tab-trigger <?php echo $activeTab === 'patient' ? 'active' : ''; ?>" id="tab-patient-login" role="tab" aria-selected="<?php echo $activeTab === 'patient' ? 'true' : 'false'; ?>" aria-controls="pane-patient-login" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:8px; border:none; font-weight:600; cursor:pointer; background:<?php echo $activeTab === 'patient' ? '#ffffff' : 'transparent'; ?>; color:<?php echo $activeTab === 'patient' ? '#0284c7' : '#64748b'; ?>; box-shadow:<?php echo $activeTab === 'patient' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; ?>;">
+        <?php echo icon('user', 'tab-icon', 18); ?> <span>Patient Portal</span>
       </button>
-      <button type="button" class="tab-trigger <?php echo $activeTab === 'staff' ? 'active' : ''; ?>" id="tab-staff-login" role="tab" aria-selected="<?php echo $activeTab === 'staff' ? 'true' : 'false'; ?>" aria-controls="pane-staff-login" style="flex:1; padding:10px 14px; border-radius:8px; border:none; font-weight:600; cursor:pointer; background:<?php echo $activeTab === 'staff' ? '#ffffff' : 'transparent'; ?>; color:<?php echo $activeTab === 'staff' ? '#0284c7' : '#64748b'; ?>; box-shadow:<?php echo $activeTab === 'staff' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; ?>;">
-        🩺 Staff Workspace
+      <button type="button" class="tab-trigger <?php echo $activeTab === 'staff' ? 'active' : ''; ?>" id="tab-staff-login" role="tab" aria-selected="<?php echo $activeTab === 'staff' ? 'true' : 'false'; ?>" aria-controls="pane-staff-login" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:8px; border:none; font-weight:600; cursor:pointer; background:<?php echo $activeTab === 'staff' ? '#ffffff' : 'transparent'; ?>; color:<?php echo $activeTab === 'staff' ? '#0284c7' : '#64748b'; ?>; box-shadow:<?php echo $activeTab === 'staff' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; ?>;">
+        <?php echo icon('stethoscope', 'tab-icon', 18); ?> <span>Staff Workspace</span>
       </button>
     </div>
 

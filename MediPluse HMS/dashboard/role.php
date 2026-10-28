@@ -87,7 +87,7 @@ if ($role !== 'admin' && can('patients', 'view')) {
         'label' => 'Registered patients',
         'value' => number_format((int) $pdo->query('SELECT COUNT(*) FROM tblPatients')->fetchColumn()),
         'note' => 'Patient records',
-        'icon' => 'P',
+        'icon' => 'users',
     ];
 }
 if ($role !== 'admin' && can('appointments', 'view')) {
@@ -99,7 +99,7 @@ if ($role !== 'admin' && can('appointments', 'view')) {
         'label' => "Today's appointments",
         'value' => number_format((int) $statement->fetchColumn()),
         'note' => 'Not cancelled',
-        'icon' => 'A',
+        'icon' => 'calendar',
     ];
 }
 if ($role !== 'admin' && can('doctors', 'view')) {
@@ -107,7 +107,7 @@ if ($role !== 'admin' && can('doctors', 'view')) {
         'label' => 'Doctors on file',
         'value' => number_format((int) $pdo->query('SELECT COUNT(*) FROM tblDoctors')->fetchColumn()),
         'note' => 'Doctor directory',
-        'icon' => 'D',
+        'icon' => 'stethoscope',
     ];
 }
 if ($role !== 'admin' && can('lab', 'view')) {
@@ -118,7 +118,7 @@ if ($role !== 'admin' && can('lab', 'view')) {
         'label' => 'Results awaiting entry',
         'value' => number_format((int) $statement->fetchColumn()),
         'note' => 'Existing lab records',
-        'icon' => 'L',
+        'icon' => 'flask-conical',
     ];
 }
 if ($role !== 'admin' && can('billing', 'view')) {
@@ -129,7 +129,7 @@ if ($role !== 'admin' && can('billing', 'view')) {
         'label' => 'Unpaid bills',
         'value' => number_format((int) $statement->fetchColumn()),
         'note' => 'Current billing records',
-        'icon' => 'B',
+        'icon' => 'credit-card',
     ];
 }
 if ($role !== 'admin' && can('staff', 'view')) {
@@ -137,7 +137,7 @@ if ($role !== 'admin' && can('staff', 'view')) {
         'label' => 'Staff records',
         'value' => number_format((int) $pdo->query('SELECT COUNT(*) FROM tblStaff')->fetchColumn()),
         'note' => 'Staff directory',
-        'icon' => 'S',
+        'icon' => 'user-plus',
     ];
 }
 
@@ -261,7 +261,7 @@ require __DIR__ . '/../partials/head.php';
               <strong><?php echo e($adminPatientCount); ?></strong>
               <small class="dashboard-metric-note">People recorded in the patient database</small>
             </div>
-            <span class="dashboard-metric-icon" aria-hidden="true">P</span>
+            <span class="dashboard-metric-icon" aria-hidden="true"><?php echo icon('users'); ?></span>
           </article>
         </section>
         <?php foreach ($adminDataTables as $tableTitle => $tableData): ?>
@@ -302,7 +302,7 @@ require __DIR__ . '/../partials/head.php';
           <?php foreach ($metricCards as $metric): ?>
             <article class="stat-card">
               <div><span class="label"><?php echo e($metric['label']); ?></span><strong><?php echo e($metric['value']); ?></strong><small class="dashboard-metric-note"><?php echo e($metric['note']); ?></small></div>
-              <span class="dashboard-metric-icon" aria-hidden="true"><?php echo e($metric['icon']); ?></span>
+              <span class="dashboard-metric-icon" aria-hidden="true"><?php echo icon($metric['icon']); ?></span>
             </article>
           <?php endforeach; ?>
         </section>
@@ -318,9 +318,9 @@ require __DIR__ . '/../partials/head.php';
           <div class="dashboard-work-grid">
             <?php foreach ($availableSections as $key => $section): ?>
               <a class="dashboard-work-card" href="<?php echo e(url($section['path'])); ?>">
-                <span class="dashboard-work-icon" aria-hidden="true"><?php echo e(strtoupper(substr($section['label'], 0, 1))); ?></span>
+                <span class="dashboard-work-icon" aria-hidden="true"><?php echo icon(sectionIcon($key)); ?></span>
                 <span><strong><?php echo e($section['label']); ?></strong><small>Open authorised section</small></span>
-                <span class="dashboard-work-arrow" aria-hidden="true">→</span>
+                <span class="dashboard-work-arrow" aria-hidden="true"><?php echo icon('arrow-right', '', 16); ?></span>
               </a>
             <?php endforeach; ?>
           </div>
@@ -361,7 +361,7 @@ require __DIR__ . '/../partials/head.php';
                       <?php endif; ?>
                       <td><?php echo e($appointment['doctorName']); ?></td>
                       <td><?php echo e(date('M d, Y · h:i A', strtotime($appointment['appointmentDate'] . ' ' . $appointment['appointmentTime']))); ?></td>
-                      <td><span class="status <?php echo e(strtolower($appointment['status'])); ?>"><?php echo e($appointment['status']); ?></span></td>
+                      <td><?php echo statusBadge($appointment['status']); ?></td>
                     </tr>
                   <?php endforeach; ?>
                 <?php endif; ?>

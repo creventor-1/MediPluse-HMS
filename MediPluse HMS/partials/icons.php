@@ -109,3 +109,18 @@ function statusBadge(string $status): string
         $escapedLabel
     );
 }
+
+function sectionIcon(string $sectionKey): string
+{
+    $map = [
+        'patients' => 'users',
+        'appointments' => 'calendar',
+        'doctors' => 'stethoscope',
+        'lab' => 'flask-conical',
+        'billing' => 'credit-card',
+        'staff' => 'user-plus',
+        'reports' => 'bar-chart',
+        'admin' => 'shield',
+    ];
+    return $map[$sectionKey] ?? 'file-text';
+}

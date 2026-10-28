@@ -140,10 +140,10 @@ require __DIR__ . '/partials/head.php';
 
     <div class="home-nav-actions">
       <a class="home-patient-nav-btn" href="<?php echo e(url('/auth/login.php?type=patient')); ?>" title="Access Patient Portal">
-        👤 Patient Portal
+        <?php echo icon('user', '', 15); ?> Patient Portal
       </a>
       <a class="home-login-link" href="<?php echo e(url('/auth/login.php?type=staff')); ?>" title="Sign in as Staff">
-        🩺 Staff Sign In
+        <?php echo icon('stethoscope', '', 15); ?> Staff Sign In
       </a>
       <a class="home-button home-button-small" href="<?php echo e(url('/auth/signup.php?type=patient')); ?>">
         Register
@@ -165,7 +165,7 @@ require __DIR__ . '/partials/head.php';
           <!-- Patient Portal Card -->
           <div class="home-portal-card patient-card">
             <div>
-              <div class="portal-badge patient-badge">👤 For Patients &amp; Visitors</div>
+              <div class="portal-badge patient-badge"><?php echo icon('user', '', 13); ?> For Patients &amp; Visitors</div>
               <h3>Patient Health Portal</h3>
               <p>View laboratory results, review hospital bills, and book consultations with specialist doctors.</p>
             </div>
@@ -183,7 +183,7 @@ require __DIR__ . '/partials/head.php';
           <!-- Staff Workspace Card -->
           <div class="home-portal-card staff-card">
             <div>
-              <div class="portal-badge staff-badge">🩺 For Hospital Staff</div>
+              <div class="portal-badge staff-badge"><?php echo icon('stethoscope', '', 13); ?> For Hospital Staff</div>
               <h3>Staff &amp; Clinical Workspace</h3>
               <p>Operational access for Doctors, Receptionists, Lab Scientists, Billing Officers, and Administration.</p>
             </div>
