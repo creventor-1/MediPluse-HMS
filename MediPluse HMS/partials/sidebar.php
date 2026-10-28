@@ -20,7 +20,7 @@ $isDoctor = $userRoleKey === 'doctor';
 $isBillingOfficer = $userRoleKey === 'billing_officer';
 $isReceptionist = $userRoleKey === 'receptionist';
 $sectionLabels = [
-    'dashboard' => 'Dashboard', 'patients' => 'Patients', 'appointments' => 'Appointments',
+    'dashboard' => 'Dashboard', 'permissions' => 'Manage Users & Permissions', 'patients' => 'Patients', 'appointments' => 'Appointments',
     'doctors' => 'Doctors', 'lab' => 'Lab Results', 'billing' => 'Billing',
     'staff' => 'Staff', 'reports' => 'Reports',
 ];
@@ -59,6 +59,12 @@ $navItem = static function (string $key, string $path, string $label, string $ic
     <?php if (!$isPatient && !$isDoctor && !$isBillingOfficer && !$isReceptionist): ?>
       <a href="<?php echo e(url(roleDashboardPath((string) ($user['role'] ?? '')))); ?>"<?php echo $activeNav === 'dashboard' ? ' class="active"' : ''; ?>>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>Dashboard</span>
+      </a>
+    <?php endif; ?>
+    <?php if (!$isPatient && !$isBillingOfficer && can('system', 'manage_users')): ?>
+      <a href="<?php echo e(url('/admin/permissions.php')); ?>"<?php echo $activeNav === 'permissions' ? ' class="active"' : ''; ?>>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Manage users &amp; permissions</span>
       </a>
     <?php endif; ?>
     <?php if ($isDoctor): ?>
@@ -101,11 +107,6 @@ $navItem = static function (string $key, string $path, string $label, string $ic
         <span><?php echo e($user['role'] ?? ''); ?></span>
       </div>
     </div>
-    <?php if (!$isPatient && !$isBillingOfficer && can('system', 'manage_users')): ?>
-    <a class="logout-link" href="<?php echo e(url('/admin/permissions.php')); ?>">
-      <span>Manage users &amp; permissions</span>
-    </a>
-    <?php endif; ?>
     <form method="POST" action="<?php echo e(url('/auth/logout.php')); ?>" class="logout-form">
       <?php echo csrf_field(); ?>
       <button class="logout-link" type="submit">

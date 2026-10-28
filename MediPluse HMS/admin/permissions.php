@@ -387,7 +387,7 @@ require __DIR__ . '/../partials/head.php';
 ?>
 <body>
   <div class="layout">
-    <?php $activeNav = 'dashboard'; require __DIR__ . '/../partials/sidebar.php'; ?>
+    <?php $activeNav = 'permissions'; require __DIR__ . '/../partials/sidebar.php'; ?>
     <main class="main-content">
       <div class="page-header">
         <div><p class="eyebrow">System administration</p><h2>Roles &amp; permissions</h2></div>
