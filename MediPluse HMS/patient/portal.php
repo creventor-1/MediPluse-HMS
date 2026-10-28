@@ -277,7 +277,7 @@ require __DIR__ . '/../partials/head.php';
       <?php if ($patientIds === []): ?>
         <section class="panel">
           <div class="empty-state">
-            Your account is not linked to a patient record yet. Please contact the hospital administrator to verify and link your account.
+            <?php echo renderEmptyState('user', 'Account Not Linked', 'Your account is not linked to a patient record yet. Please contact the hospital administrator to verify and link your account.'); ?>
           </div>
         </section>
       <?php else: ?>
@@ -303,7 +303,7 @@ require __DIR__ . '/../partials/head.php';
           <div class="panel-header"><h3>Doctors</h3></div>
           <p class="hint">Browse the hospital doctor directory and specialties when choosing an appointment.</p>
           <?php if ($doctors === []): ?>
-            <div class="empty-state">No doctors are currently listed.</div>
+            <?php echo renderEmptyState('stethoscope', 'No doctors listed', 'No doctors are currently listed in the directory.'); ?>
           <?php else: ?>
             <div class="table-wrap">
               <table>
@@ -322,7 +322,7 @@ require __DIR__ . '/../partials/head.php';
           <div class="panel-header"><h3>Book an appointment</h3></div>
           <p class="hint">Appointments are booked only for your verified patient record. A time already booked with a doctor cannot be selected.</p>
           <?php if ($doctors === []): ?>
-            <div class="empty-state">Appointments cannot be booked until a doctor is listed.</div>
+            <?php echo renderEmptyState('calendar', 'Booking Unavailable', 'Appointments cannot be booked until a doctor is listed.'); ?>
           <?php else: ?>
             <form method="POST" class="form-grid patient-appointment-form">
               <?php echo csrf_field(); ?>
@@ -347,7 +347,7 @@ require __DIR__ . '/../partials/head.php';
               <label>Time
                 <input type="time" name="appointment_time" required>
               </label>
-              <div class="form-actions"><button type="submit" name="book_appointment" value="1">Book appointment</button></div>
+              <div class="form-actions"><button type="submit" name="book_appointment" value="1"><?php echo icon('calendar', '', 16); ?> Book appointment</button></div>
             </form>
           <?php endif; ?>
         </section>
@@ -355,7 +355,7 @@ require __DIR__ . '/../partials/head.php';
         <section class="panel">
           <div class="panel-header"><h3>My appointments</h3></div>
           <?php if ($appointments === []): ?>
-            <div class="empty-state">You have no appointments yet.</div>
+            <?php echo renderEmptyState('calendar', 'No appointments yet', 'You have no appointments booked yet.'); ?>
           <?php else: ?>
             <div class="table-wrap">
               <table>
@@ -368,7 +368,7 @@ require __DIR__ . '/../partials/head.php';
                       <td><?php echo e($appointment['doctorName']); ?></td>
                       <td><?php echo e($appointment['specialty'] ?: 'General practice'); ?></td>
                       <td><?php echo e($appointment['attendedByName'] ?: 'Not recorded'); ?></td>
-                      <td><span class="status <?php echo e(strtolower($appointment['status'])); ?>"><?php echo e($appointment['status']); ?></span></td>
+                      <td><?php echo statusBadge($appointment['status']); ?></td>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
@@ -381,7 +381,7 @@ require __DIR__ . '/../partials/head.php';
           <div class="panel-header"><h3>My lab results and medical reports</h3></div>
           <p class="hint">Only clinician-entered reports connected to your linked patient record are displayed here.</p>
           <?php if ($labResults === []): ?>
-            <div class="empty-state">No clinician-entered lab results or reports are available yet.</div>
+            <?php echo renderEmptyState('flask-conical', 'No medical reports', 'No clinician-entered lab results or reports are available yet.'); ?>
           <?php else: ?>
             <div class="table-wrap">
               <table>
@@ -393,7 +393,7 @@ require __DIR__ . '/../partials/head.php';
                       <td><?php echo e($labResult['testType']); ?></td>
                       <td><?php echo $labResult['resultValue'] !== null && $labResult['resultValue'] !== ''
                           ? e($labResult['resultValue'])
-                          : '<span class="status pending">Pending</span>'; ?></td>
+                          : statusBadge('Pending'); ?></td>
                       <td><?php echo e($labResult['doctorName']); ?></td>
                       <td><?php echo e($labResult['dateRecorded'] ?: 'Pending'); ?></td>
                     </tr>
@@ -409,7 +409,7 @@ require __DIR__ . '/../partials/head.php';
           <div class="panel-header" id="my-bills"><h3>My bills</h3></div>
           <p class="hint">Only bills connected to your approved patient record are shown. Charges are created by hospital staff; patients cannot create or change bill amounts.</p>
           <?php if ($bills === []): ?>
-            <div class="empty-state">There are no bills on your linked patient record.</div>
+            <?php echo renderEmptyState('credit-card', 'No bills recorded', 'There are no bills on your linked patient record.'); ?>
           <?php else: ?>
             <div class="table-wrap">
               <table>
@@ -430,12 +430,12 @@ require __DIR__ . '/../partials/head.php';
                       <td><?php echo e(number_format((float) $bill['amount'], 2)); ?></td>
                       <td><?php echo e(number_format((float) $bill['paidAmount'], 2)); ?></td>
                       <td><?php echo e(number_format($balance, 2)); ?></td>
-                      <td><span class="status <?php echo e(strtolower($bill['paymentStatus'])); ?>"><?php echo e($bill['paymentStatus']); ?></span></td>
+                      <td><?php echo statusBadge($bill['paymentStatus']); ?></td>
                       <td>
                         <?php if ($balance <= 0): ?>
                           <span>Nothing due</span>
                         <?php elseif (isset($pendingRequestsByBill[$bill['billID']])): ?>
-                          <span class="status pending">Payment request pending</span>
+                          <?php echo statusBadge('Pending'); ?>
                         <?php else: ?>
                           <form method="POST" class="patient-payment-form">
                             <?php echo csrf_field(); ?>
@@ -475,7 +475,7 @@ require __DIR__ . '/../partials/head.php';
                     <td><?php echo e($request['billID']); ?></td>
                     <td><?php echo e(number_format((float) $request['amount'], 2)); ?></td>
                     <td><?php echo e($request['paymentMethod']); ?></td>
-                    <td><span class="status <?php echo e($request['status'] === 'pending' ? 'pending' : strtolower($request['status'])); ?>"><?php echo e(ucfirst($request['status'])); ?></span></td>
+                    <td><?php echo statusBadge($request['status']); ?></td>
                     <td><?php echo e($request['requestedAt']); ?></td>
                   </tr>
                 <?php endforeach; ?>
