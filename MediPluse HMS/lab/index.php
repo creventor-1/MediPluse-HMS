@@ -96,7 +96,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Laboratory</p>
           <h2>Lab Results</h2>
         </div>
-        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary">Back</a>
+        <a href="<?php echo e(url(roleDashboardPath($roleKey))); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -134,7 +134,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="text" name="test_type" maxlength="100" placeholder="e.g. Full blood count" required>
           </label>
           <div class="form-actions">
-            <button type="submit" name="request_test">Request Test</button>
+            <button type="submit" name="request_test"><?php echo icon('flask-conical', '', 16); ?> Request Test</button>
           </div>
         </form>
       </section>
@@ -160,10 +160,7 @@ require __DIR__ . '/../partials/head.php';
             <?php if (empty($results)): ?>
               <tr>
                 <td colspan="7">
-                  <div class="empty-state">
-                    <span class="emoji">🧪</span>
-                    No laboratory records found.
-                  </div>
+                  <?php echo renderEmptyState('flask-conical', 'No laboratory records found', 'Laboratory test requests and results will appear here.'); ?>
                 </td>
               </tr>
             <?php else: ?>
@@ -173,18 +170,18 @@ require __DIR__ . '/../partials/head.php';
                   <td class="cell-primary"><?php echo e($r['patientName']); ?></td>
                   <td><?php echo e($r['testType']); ?></td>
                   <td><?php echo e($r['doctorName']); ?></td>
-                  <td><?php echo $r['resultValue'] ? e($r['resultValue']) : '<span class="status pending">Pending</span>'; ?></td>
+                  <td><?php echo $r['resultValue'] ? e($r['resultValue']) : statusBadge('Pending'); ?></td>
                   <td><?php echo e($r['dateRecorded'] ?: 'N/A'); ?></td>
                   <?php if ($canEnter || $canDelete): ?>
                   <td>
                     <div class="list-actions">
                       <?php if ($canEnter): ?>
-                      <a class="button-link secondary small" href="<?php echo e(url('/lab/edit.php?id=' . urlencode($r['labResultID']))); ?>"><?php echo $r['resultValue'] ? 'Edit result' : 'Enter result'; ?></a>
+                      <a class="button-link secondary small" href="<?php echo e(url('/lab/edit.php?id=' . urlencode($r['labResultID']))); ?>"><?php echo icon('edit', '', 14); ?> <?php echo $r['resultValue'] ? 'Edit result' : 'Enter result'; ?></a>
                       <?php endif; ?>
                       <?php if ($canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this record?');">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" name="delete_lab" value="<?php echo e($r['labResultID']); ?>" class="button-link secondary small">Delete</button>
+                        <button type="submit" name="delete_lab" value="<?php echo e($r['labResultID']); ?>" class="button-link secondary small"><?php echo icon('trash-2', '', 14); ?> Delete</button>
                       </form>
                       <?php endif; ?>
                     </div>

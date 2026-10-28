@@ -68,7 +68,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Laboratory</p>
           <h2>Enter Lab Result</h2>
         </div>
-        <a href="<?php echo e(url('/lab/index.php')); ?>" class="button-link secondary">Back to lab results</a>
+        <a href="<?php echo e(url('/lab/index.php')); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back to lab results</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -90,7 +90,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="date" name="date" max="<?php echo e(date('Y-m-d')); ?>" value="<?php echo e($lab['dateRecorded'] ?: date('Y-m-d')); ?>" required>
           </label>
           <div class="form-actions">
-            <button type="submit" name="save_result">Save Result</button>
+            <button type="submit" name="save_result"><?php echo icon('check', '', 16); ?> Save Result</button>
             <a href="<?php echo e(url('/lab/index.php')); ?>" class="button-link secondary">Cancel</a>
           </div>
         </form>
