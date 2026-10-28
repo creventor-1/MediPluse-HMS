@@ -98,7 +98,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Administration</p>
           <h2>Administrative Report</h2>
         </div>
-        <button type="button" class="button-link secondary" onclick="window.print()">Print report</button>
+        <button type="button" class="button-link secondary" onclick="window.print()"><?php echo icon('printer', '', 16); ?> Print report</button>
       </div>
 
       <?php if ($hasReportData): ?>
@@ -115,7 +115,7 @@ require __DIR__ . '/../partials/head.php';
             <input type="date" name="to" value="<?php echo e($to); ?>">
           </label>
           <div class="form-actions">
-            <button type="submit">Generate</button>
+            <button type="submit"><?php echo icon('filter', '', 16); ?> Generate</button>
             <a href="<?php echo e(url('/reports/index.php')); ?>" class="button-link secondary">Reset</a>
           </div>
         </form>
@@ -126,16 +126,16 @@ require __DIR__ . '/../partials/head.php';
 
       <div class="stats-grid">
         <?php if ($canViewPatients): ?>
-        <div class="stat-card"><div><span class="label">Registered patients</span><strong><?php echo e($count('tblPatients')); ?></strong></div></div>
+        <div class="stat-card"><div class="stat-icon"><?php echo icon('users'); ?></div><div><span class="label">Registered patients</span><strong><?php echo e($count('tblPatients')); ?></strong></div></div>
         <?php endif; ?>
         <?php if ($canViewDoctors): ?>
-        <div class="stat-card"><div><span class="label">Doctors</span><strong><?php echo e($count('tblDoctors')); ?></strong></div></div>
+        <div class="stat-card"><div class="stat-icon"><?php echo icon('stethoscope'); ?></div><div><span class="label">Doctors</span><strong><?php echo e($count('tblDoctors')); ?></strong></div></div>
         <?php endif; ?>
         <?php if ($canViewStaff): ?>
-        <div class="stat-card"><div><span class="label">Staff accounts</span><strong><?php echo e($count('tblStaff')); ?></strong></div></div>
+        <div class="stat-card"><div class="stat-icon"><?php echo icon('user-plus'); ?></div><div><span class="label">Staff accounts</span><strong><?php echo e($count('tblStaff')); ?></strong></div></div>
         <?php endif; ?>
         <?php if ($canViewLab): ?>
-        <div class="stat-card"><div><span class="label">Lab tests (pending / done)</span><strong><?php echo e($labPending . ' / ' . $labDone); ?></strong></div></div>
+        <div class="stat-card"><div class="stat-icon"><?php echo icon('flask-conical'); ?></div><div><span class="label">Lab tests (pending / done)</span><strong><?php echo e($labPending . ' / ' . $labDone); ?></strong></div></div>
         <?php endif; ?>
       </div>
 
@@ -146,10 +146,10 @@ require __DIR__ . '/../partials/head.php';
           <thead><tr><th>Status</th><th>Total</th></tr></thead>
           <tbody>
             <?php if (empty($apptByStatus)): ?>
-              <tr><td colspan="2"><div class="empty-state">No appointments in this period.</div></td></tr>
+              <tr><td colspan="2"><?php echo renderEmptyState('calendar', 'No appointments in this period', 'Try expanding the date range filter.'); ?></td></tr>
             <?php else: ?>
               <?php foreach ($apptByStatus as $row): ?>
-                <tr><td><?php echo e($row['status']); ?></td><td><?php echo e($row['total']); ?></td></tr>
+                <tr><td><?php echo statusBadge($row['status']); ?></td><td><?php echo e($row['total']); ?></td></tr>
               <?php endforeach; ?>
             <?php endif; ?>
           </tbody>
@@ -164,7 +164,7 @@ require __DIR__ . '/../partials/head.php';
           <thead><tr><th>Doctor</th><th>Appointments</th></tr></thead>
           <tbody>
             <?php if (empty($apptByDoctor)): ?>
-              <tr><td colspan="2"><div class="empty-state">No doctors found.</div></td></tr>
+              <tr><td colspan="2"><?php echo renderEmptyState('stethoscope', 'No appointments recorded', 'No appointments found for doctors in this period.'); ?></td></tr>
             <?php else: ?>
               <?php foreach ($apptByDoctor as $row): ?>
                 <tr><td><?php echo e($row['fullName']); ?></td><td><?php echo e($row['total']); ?></td></tr>
@@ -183,7 +183,7 @@ require __DIR__ . '/../partials/head.php';
           <tbody>
             <?php foreach ($billTotals as $status => $t): ?>
               <tr>
-                <td><?php echo e($status); ?></td>
+                <td><?php echo statusBadge($status); ?></td>
                 <td><?php echo e($t['total']); ?></td>
                 <td><?php echo e(number_format($t['amount'], 2)); ?></td>
               </tr>
