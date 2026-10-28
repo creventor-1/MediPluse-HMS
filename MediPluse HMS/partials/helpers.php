@@ -349,6 +349,103 @@ function createPendingAccount(
     return $userId;
 }
 
+function registerDirectPatientAccount(
+    PDO $pdo,
+    string $name,
+    string $email,
+    string $password,
+    string $gender,
+    string $dateOfBirth,
+    string $phoneNumber = '',
+    string $address = ''
+): array {
+    $email = strtolower(trim($email));
+    $name = trim($name);
+    $gender = trim($gender);
+    $dateOfBirth = trim($dateOfBirth);
+    $phoneNumber = trim($phoneNumber);
+    $address = trim($address);
+
+    if (mb_strlen($name) < 2 || mb_strlen($name) > 100) {
+        throw new InvalidArgumentException('Enter a name between 2 and 100 characters.');
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
+        throw new InvalidArgumentException('Enter a valid email address.');
+    }
+    if (strlen($password) < 12) {
+        throw new InvalidArgumentException('Choose a password with at least 12 characters.');
+    }
+    if (!in_array($gender, ['Male', 'Female', 'Other'], true)) {
+        throw new InvalidArgumentException('Choose a valid gender option.');
+    }
+    $dobDate = DateTimeImmutable::createFromFormat('Y-m-d', $dateOfBirth);
+    if (!$dobDate || $dobDate->format('Y-m-d') !== $dateOfBirth || $dobDate > new DateTimeImmutable('today')) {
+        throw new InvalidArgumentException('Enter a valid date of birth in the past.');
+    }
+
+    $existing = $pdo->prepare('SELECT userID FROM tblUsers WHERE email = ? LIMIT 1');
+    $existing->execute([$email]);
+    if ($existing->fetchColumn()) {
+        throw new InvalidArgumentException('That email address is already associated with an account.');
+    }
+
+    $userId = nextId($pdo, 'tblUsers', 'userID', 'USR');
+    $patientId = nextId($pdo, 'tblPatients', 'patientID', 'PAT');
+    $username = 'patient_' . bin2hex(random_bytes(8));
+
+    $pdo->beginTransaction();
+    try {
+        $stmtUser = $pdo->prepare(
+            "INSERT INTO tblUsers (userID, username, email, displayName, passwordHash, role, accountStatus, sessionVersion)
+             VALUES (?, ?, ?, ?, ?, 'Patient', 'active', 1)"
+        );
+        $stmtUser->execute([
+            $userId,
+            $username,
+            $email,
+            $name,
+            password_hash($password, PASSWORD_DEFAULT),
+        ]);
+
+        $stmtPatient = $pdo->prepare(
+            "INSERT INTO tblPatients (patientID, fullName, gender, dateOfBirth, phoneNumber, address, registrationDate)
+             VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE)"
+        );
+        $stmtPatient->execute([
+            $patientId,
+            $name,
+            $gender,
+            $dateOfBirth,
+            $phoneNumber !== '' ? $phoneNumber : null,
+            $address !== '' ? $address : null,
+        ]);
+
+        $stmtLink = $pdo->prepare(
+            "INSERT INTO tblPatientAccounts (userID, patientID, accountStatus, approvedBy, approvedAt)
+             VALUES (?, ?, 'active', NULL, CURRENT_TIMESTAMP)"
+        );
+        $stmtLink->execute([$userId, $patientId]);
+
+        $pdo->commit();
+
+        return [
+            'id'            => $userId,
+            'username'      => $username,
+            'email'         => $email,
+            'name'          => $name,
+            'role'          => 'Patient',
+            'accountStatus' => 'active',
+            'sessionVersion'=> 1,
+            'patientID'     => $patientId,
+        ];
+    } catch (Throwable $error) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $error;
+    }
+}
+
 function ensureDoctorProfileForAccount(PDO $pdo, string $userId, string $specialty): string
 {
     $profile = $pdo->prepare('SELECT doctorID FROM tblDoctors WHERE userID = ?');
