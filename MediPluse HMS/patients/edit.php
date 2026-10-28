@@ -60,7 +60,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Records</p>
           <h2>Edit Patient</h2>
         </div>
-        <a href="<?php echo e(url('/patients/index.php')); ?>" class="button-link secondary">Back to patients</a>
+        <a href="<?php echo e(url('/patients/index.php')); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back to patients</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -98,7 +98,7 @@ require __DIR__ . '/../partials/head.php';
             <textarea name="address" rows="3" maxlength="150"><?php echo e($patient['address']); ?></textarea>
           </label>
           <div class="form-actions">
-            <button type="submit" name="update_patient">Save Changes</button>
+            <button type="submit" name="update_patient"><?php echo icon('check', '', 16); ?> Save Changes</button>
             <a href="<?php echo e(url('/patients/index.php')); ?>" class="button-link secondary">Cancel</a>
           </div>
         </form>

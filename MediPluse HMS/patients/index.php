@@ -77,7 +77,7 @@ require __DIR__ . '/../partials/head.php';
           <p class="eyebrow">Records</p>
           <h2>Patients</h2>
         </div>
-        <a href="<?php echo e(url(roleDashboardPath(currentRoleKey()))); ?>" class="button-link secondary">Back</a>
+        <a href="<?php echo e(url(roleDashboardPath(currentRoleKey()))); ?>" class="button-link secondary"><?php echo icon('chevron-left', '', 16); ?> Back</a>
       </div>
 
       <?php if ($message !== ''): ?>
@@ -115,7 +115,7 @@ require __DIR__ . '/../partials/head.php';
             <textarea name="address" rows="3" maxlength="150" placeholder="Residential address"></textarea>
           </label>
           <div class="form-actions">
-            <button type="submit" name="save_patient">Save Patient</button>
+            <button type="submit" name="save_patient"><?php echo icon('user-plus', '', 16); ?> Save Patient</button>
           </div>
         </form>
       </section>
@@ -128,7 +128,7 @@ require __DIR__ . '/../partials/head.php';
 
         <form method="GET" class="search-bar">
           <input type="text" name="q" placeholder="Search by ID, name or phone…" value="<?php echo e($search); ?>">
-          <button type="submit" class="button-link small">Search</button>
+          <button type="submit" class="button-link small"><?php echo icon('search', '', 14); ?> Search</button>
           <?php if ($search !== ''): ?>
             <a class="button-link secondary small" href="<?php echo e(url('/patients/index.php')); ?>">Clear</a>
           <?php endif; ?>
@@ -150,10 +150,7 @@ require __DIR__ . '/../partials/head.php';
             <?php if (empty($patients)): ?>
               <tr>
                 <td colspan="7">
-                  <div class="empty-state">
-                    <span class="emoji">🧑‍⚕️</span>
-                    No patients found.
-                  </div>
+                  <?php echo renderEmptyState('users', 'No patients found', 'Try adjusting your search query or register a new patient.'); ?>
                 </td>
               </tr>
             <?php else: ?>
@@ -169,12 +166,12 @@ require __DIR__ . '/../partials/head.php';
                   <td>
                     <div class="list-actions">
                       <?php if ($canUpdate): ?>
-                      <a class="button-link secondary small" href="<?php echo e(url('/patients/edit.php?id=' . urlencode($patient['patientID']))); ?>">Edit</a>
+                      <a class="button-link secondary small" href="<?php echo e(url('/patients/edit.php?id=' . urlencode($patient['patientID']))); ?>"><?php echo icon('edit', '', 14); ?> Edit</a>
                       <?php endif; ?>
                       <?php if ($canDelete): ?>
                       <form method="POST" style="display:inline" onsubmit="return confirm('Delete this patient?');">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" name="delete_patient" value="<?php echo e($patient['patientID']); ?>" class="button-link secondary small">Delete</button>
+                        <button type="submit" name="delete_patient" value="<?php echo e($patient['patientID']); ?>" class="button-link secondary small"><?php echo icon('trash-2', '', 14); ?> Delete</button>
                       </form>
                       <?php endif; ?>
                     </div>
